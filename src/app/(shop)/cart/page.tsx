@@ -5,11 +5,17 @@ import Link from 'next/link'
 import { Trash2, Plus, Minus, ArrowRight, ShoppingCart } from 'lucide-react'
 import { useCart, useRemoveFromCart, useUpdateCartItem } from '@/hooks/useCart'
 import { cn } from '@/lib/utils'
+import { useUser } from '@/hooks/useAuth'
+import { useAuthModalStore } from '@/store/useAuthModalStore'
+import { useRouter } from 'next/navigation'
 
 export default function CartPage() {
     const { data: cartData, isLoading } = useCart();
     const { mutate: removeFromCart } = useRemoveFromCart();
     const { mutate: updateCartItem } = useUpdateCartItem();
+    const { data: user } = useUser();
+    const { openModal } = useAuthModalStore();
+    const router = useRouter();
 
     const cartItems = cartData?.items || [];
     const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
@@ -154,12 +160,18 @@ export default function CartPage() {
                                 <span className="text-2xl font-extrabold text-amber-700">₹{total.toLocaleString()}</span>
                             </div>
 
-                            <Link
-                                href="/checkout/address"
+                            <button
+                                onClick={() => {
+                                    if (user) {
+                                        router.push('/checkout/address');
+                                    } else {
+                                        openModal('LOGIN');
+                                    }
+                                }}
                                 className="block w-full bg-stone-900 hover:bg-amber-600 text-white font-bold py-5 rounded-2xl shadow-xl hover:shadow-amber-200 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] text-center"
                             >
                                 Proceed to Checkout
-                            </Link>
+                            </button>
 
                             <div className="mt-8 space-y-4">
                                 <div className="flex items-center gap-3 text-xs text-stone-500 justify-center">

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCheckoutStore } from '@/store/useCheckoutStore';
 import { useCart } from '@/hooks/useCart';
@@ -10,18 +10,42 @@ import { cn } from '@/lib/utils';
 import OrderSummary from '@/components/checkout/OrderSummary';
 import { toast } from 'sonner';
 import api from '@/lib/axios';
+import { useQueryClient } from '@tanstack/react-query';
+
+// Razorpay Type Definition (Basic)
+declare global {
+    interface Window {
+        Razorpay: any;
+    }
+}
+
+const loadRazorpay = () => {
+    return new Promise((resolve) => {
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.onload = () => resolve(true);
+        script.onerror = () => resolve(false);
+        document.body.appendChild(script);
+    });
+};
 
 export default function PaymentPage() {
     const router = useRouter();
-    const { selectedAddressId, isAddressConfirmed, paymentMethod, setPaymentMethod, resetCheckout } = useCheckoutStore();
+    const queryClient = useQueryClient();
+    const { selectedAddressId, isAddressConfirmed, paymentMethod, setPaymentMethod } = useCheckoutStore();
     const { data: cart, isLoading: isCartLoading } = useCart();
     const { addresses } = useAddress();
     const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
+    // Use a ref to track if order was successfully placed to prevent the "Empty Cart" redirect
+    // from triggering while we are redirecting to the success page.
+    const isOrderSuccess = useRef(false);
+
     // Redirect if checks fail
     useEffect(() => {
-        if (isCartLoading) return;
+        if (isCartLoading || isOrderSuccess.current) return;
 
+        // If cart is empty and we haven't just placed an order, redirect.
         if (!cart || cart.items.length === 0) {
             router.push('/cart');
         } else if (!selectedAddressId || !isAddressConfirmed) {
@@ -44,21 +68,103 @@ export default function PaymentPage() {
 
         setIsPlacingOrder(true);
         try {
-            await api.post('/orders', {
-                items: cart?.items, // Backend should ideally re-fetch from cart ID to be safe, but passing items is common
+            // 1. Create Order on Backend
+            const orderRes = await api.post('/orders', {
+                items: cart?.items,
                 shippingAddress: selectedAddress,
                 paymentMethod: paymentMethod
             });
+            const order = orderRes.data.data;
 
-            toast.success('Order placed successfully!');
-            resetCheckout();
-            router.push('/account/orders'); // Or a thank you page
+            if (paymentMethod === 'ONLINE') {
+                const isLoaded = await loadRazorpay();
+                if (!isLoaded) {
+                    throw new Error('Razorpay SDK failed to load');
+                }
+
+                // 2. Create Razorpay Order
+                const rzOrderRes = await api.post('/payments/razorpay/create-order', {
+                    orderId: order._id
+                });
+                const { id: razorpayOrderId, amount, currency, key } = rzOrderRes.data;
+
+                const options = {
+                    key: key,
+                    amount: amount,
+                    currency: currency,
+                    name: "Anuraga Pickles",
+                    description: "Order Processing",
+                    order_id: razorpayOrderId,
+                    handler: async function (response: any) {
+                        try {
+                            // 3. Verify Payment
+                            const verifyRes = await api.post('/payments/razorpay/verify', {
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                                orderId: order._id
+                            });
+
+                            if (verifyRes.data.success) {
+                                handleOrderSuccess(order._id);
+                            }
+                        } catch (err) {
+                            console.error("Payment verification failed", err);
+                            toast.error("Payment verification failed. Cancelling order...");
+
+                            // Cancel Order and release stock
+                            await api.post(`/orders/${order._id}/cancel`, { reason: "Payment Verification Failed" });
+                            setIsPlacingOrder(false);
+                        }
+                    },
+                    prefill: {
+                        name: selectedAddress.name,
+                        contact: selectedAddress.phone,
+                        // email: user?.email // Optional if we have it
+                    },
+                    theme: {
+                        color: "#d97706" // amber-600
+                    },
+                    modal: {
+                        ondismiss: async function () {
+                            setIsPlacingOrder(false);
+                            toast.info("Payment cancelled. Stock released.");
+                            // Cancel Order and release stock
+                            try {
+                                await api.post(`/orders/${order._id}/cancel`, { reason: "Payment Cancelled by User" });
+                            } catch (e) {
+                                console.error("Failed to cancel order", e);
+                            }
+                        }
+                    }
+                };
+
+                const rzp1 = new window.Razorpay(options);
+                rzp1.open();
+
+            } else {
+                // COD
+                handleOrderSuccess(order._id);
+            }
+
         } catch (error: any) {
             console.error(error);
             toast.error(error.response?.data?.message || 'Failed to place order');
-        } finally {
             setIsPlacingOrder(false);
         }
+    };
+
+    const handleOrderSuccess = async (orderId: string) => {
+        isOrderSuccess.current = true; // Prevent redirect effect
+        toast.success('Order placed successfully!');
+
+        // Invalidate cart so it refetches (and shows empty)
+        await queryClient.invalidateQueries({ queryKey: ['cart'] });
+
+        // Navigate to completion page
+        // We do NOT call resetCheckout() here to avoid the race condition.
+        // It will be called in the OrderCompleted page.
+        router.push(`/order-completed?orderId=${orderId}`);
     };
 
     return (
@@ -117,7 +223,7 @@ export default function PaymentPage() {
                     <div className="mt-6 flex items-start gap-3 p-4 bg-stone-50 rounded-lg text-xs text-stone-500 leading-relaxed">
                         <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
                         <p>
-                            Your payment is 100% secure. We use razorpay for online transactions.
+                            Your payment is 100% secure. We use Razorpay for online transactions.
                             For COD, please keep exact change ready.
                         </p>
                     </div>
