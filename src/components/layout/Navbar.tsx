@@ -2,31 +2,69 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ShoppingBag, Menu, X, User, Search } from 'lucide-react'
-import { useCartStore } from '@/store/useCartStore'
+import { ShoppingBag, Menu, X, User, Search, LogOut } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useCart } from '@/hooks/useCart'
+import { useUser, useLogout } from '@/hooks/useAuth'
+import { useAuthModalStore } from '@/store/useAuthModalStore'
 
 export default function Navbar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-    const cartItems = useCartStore((state) => state.items)
+    const [expandedMobileSection, setExpandedMobileSection] = useState<string | null>(null)
     const [mounted, setMounted] = useState(false)
 
-    // Hydration fix for zustand
+    // Data Hooks
+    const { data: cart } = useCart();
+    const { data: user } = useUser();
+    const { mutate: logout } = useLogout();
+
+    const { openModal } = useAuthModalStore();
+    const cartItemCount = cart?.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
+
+    // Hydration fix
     useEffect(() => {
         setMounted(true)
     }, [])
 
     const navLinks = [
-        { name: 'Shop All', href: '/collections/all-products' },
-        { name: 'Pickles', href: '/collections/mango-pickles' },
-        { name: 'Combos', href: '/collections/combos' },
-        { name: 'Festive Deals', href: '/collections/festive-deals' },
+        {
+            name: 'Shop',
+            href: '/collections/all-products',
+            isDropdown: true,
+            children: [
+                { name: 'All Products', href: '/collections/all-products' },
+                { name: 'Pickles', href: '/collections/pickles' },
+                { name: 'Cold-Pressed Oils', href: '#', isComingSoon: true },
+                { name: 'Spices & Masalas', href: '#', isComingSoon: true },
+            ],
+        },
+        {
+            name: 'Our Story',
+            href: '/about',
+            isDropdown: true,
+            children: [
+                { name: 'About ANURAGA', href: '/about' },
+                { name: 'The Women Behind Our Food', href: '/women-behind-food' },
+                { name: 'Our Production Process', href: '/production-process' },
+            ],
+        },
+        { name: 'Wellness Hub', href: '/blog' },
+        { name: 'Recipes', href: '/recipes' },
+        { name: 'Contact', href: '/contact' },
     ]
+
+    const toggleMobileSection = (name: string) => {
+        if (expandedMobileSection === name) {
+            setExpandedMobileSection(null)
+        } else {
+            setExpandedMobileSection(name)
+        }
+    }
 
     return (
         <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-stone-200">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between items-center h-16">
+                <div className="flex justify-between items-center h-20">
                     {/* Logo */}
                     <div className="flex-shrink-0 flex items-center">
                         <Link href="/" className="text-2xl font-extrabold text-amber-700 tracking-tighter">
@@ -35,40 +73,101 @@ export default function Navbar() {
                     </div>
 
                     {/* Desktop Navigation */}
-                    <div className="hidden md:flex space-x-8 items-center">
+                    <div className="hidden lg:flex space-x-8 items-center">
                         {navLinks.map((link) => (
-                            <Link
-                                key={link.name}
-                                href={link.href}
-                                className="text-stone-600 hover:text-amber-700 font-medium transition-colors"
-                            >
-                                {link.name}
-                            </Link>
+                            <div key={link.name} className="relative group">
+                                {link.isDropdown ? (
+                                    <button className="flex items-center text-stone-600 hover:text-amber-700 font-medium transition-colors py-2">
+                                        {link.name}
+                                        <svg
+                                            className="w-4 h-4 ml-1 transform group-hover:rotate-180 transition-transform duration-200"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </button>
+                                ) : (
+                                    <Link
+                                        href={link.href}
+                                        className="text-stone-600 hover:text-amber-700 font-medium transition-colors"
+                                    >
+                                        {link.name}
+                                    </Link>
+                                )}
+
+                                {/* Dropdown Menu */}
+                                {link.isDropdown && link.children && (
+                                    <div className="absolute left-0 mt-0 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 ease-in-out z-50 pt-2">
+                                        <div className="bg-white border border-stone-100 rounded-lg shadow-xl overflow-hidden">
+                                            {link.children.map((child) => (
+                                                <Link
+                                                    key={child.name}
+                                                    href={child.href}
+                                                    className={cn(
+                                                        "block px-4 py-3 text-sm transition-colors hover:bg-stone-50",
+                                                        child.isComingSoon
+                                                            ? "text-stone-400 cursor-not-allowed pointer-events-none"
+                                                            : "text-stone-700 hover:text-amber-700"
+                                                    )}
+                                                >
+                                                    <div className="flex justify-between items-center">
+                                                        <span>{child.name}</span>
+                                                        {child.isComingSoon && (
+                                                            <span className="text-[10px] uppercase font-bold text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full">
+                                                                Soon
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         ))}
                     </div>
 
                     {/* Icons / Actions */}
-                    <div className="flex items-center space-x-6">
-                        <button className="text-stone-600 hover:text-amber-700 transition-colors">
+                    <div className="flex items-center space-x-4 sm:space-x-6">
+                        <button className="text-stone-600 hover:text-amber-700 transition-colors p-1">
                             <Search className="w-5 h-5" />
                         </button>
-                        <Link href="/account" className="text-stone-600 hover:text-amber-700 transition-colors hidden sm:block">
-                            <User className="w-5 h-5" />
-                        </Link>
-                        <Link href="/cart" className="group flex items-center text-stone-600 hover:text-amber-700 transition-colors relative">
+
+                        <div className="hidden sm:flex items-center border-l border-stone-200 pl-6 space-x-6">
+                            {user ? (
+                                <div className="flex items-center space-x-4">
+                                    <span className="text-sm font-medium text-stone-700">Hi, {user.name}</span>
+                                    <button onClick={() => logout()} className="text-stone-600 hover:text-red-600 transition-colors" title="Logout">
+                                        <LogOut className="w-5 h-5" />
+                                    </button>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={() => openModal('LOGIN')}
+                                    className="flex items-center space-x-1 text-stone-600 hover:text-amber-700 transition-colors"
+                                >
+                                    <User className="w-5 h-5" />
+                                    <span className="text-sm font-medium">Login</span>
+                                </button>
+                            )}
+                        </div>
+
+                        <Link href="/cart" className="group flex items-center text-stone-600 hover:text-amber-700 transition-colors relative p-1">
                             <ShoppingBag className="w-5 h-5" />
-                            {mounted && cartItems.length > 0 && (
-                                <span className="absolute -top-2 -right-2 bg-amber-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-                                    {cartItems.length}
+                            {mounted && cartItemCount > 0 && (
+                                <span className="absolute -top-1.5 -right-1.5 bg-amber-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">
+                                    {cartItemCount}
                                 </span>
                             )}
                         </Link>
 
                         {/* Mobile Menu Button */}
-                        <div className="md:hidden flex items-center">
+                        <div className="lg:hidden flex items-center ml-2">
                             <button
                                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                                className="text-stone-600 hover:text-amber-700 focus:outline-none"
+                                className="text-stone-600 hover:text-amber-700 focus:outline-none p-1"
                             >
                                 {isMobileMenuOpen ? (
                                     <X className="w-6 h-6" />
@@ -83,25 +182,98 @@ export default function Navbar() {
 
             {/* Mobile Menu */}
             {isMobileMenuOpen && (
-                <div className="md:hidden bg-white border-t border-stone-100">
-                    <div className="pt-2 pb-4 space-y-1 px-4">
+                <div className="lg:hidden bg-white border-t border-stone-100 h-[calc(100vh-80px)] overflow-y-auto">
+                    <div className="py-2 px-4 space-y-1">
                         {navLinks.map((link) => (
-                            <Link
-                                key={link.name}
-                                href={link.href}
-                                onClick={() => setIsMobileMenuOpen(false)}
-                                className="block px-3 py-2 rounded-md text-base font-medium text-stone-700 hover:text-amber-700 hover:bg-stone-50"
-                            >
-                                {link.name}
-                            </Link>
+                            <div key={link.name} className="border-b border-stone-50 last:border-0">
+                                {link.isDropdown ? (
+                                    <>
+                                        <button
+                                            onClick={() => toggleMobileSection(link.name)}
+                                            className="flex justify-between items-center w-full px-3 py-4 text-base font-medium text-stone-800 hover:text-amber-700"
+                                        >
+                                            {link.name}
+                                            <svg
+                                                className={cn(
+                                                    "w-4 h-4 text-stone-400 transition-transform duration-200",
+                                                    expandedMobileSection === link.name ? "rotate-180" : ""
+                                                )}
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+                                        <div
+                                            className={cn(
+                                                "overflow-hidden transition-all duration-300 ease-in-out bg-stone-50",
+                                                expandedMobileSection === link.name ? "max-h-96" : "max-h-0"
+                                            )}
+                                        >
+                                            {link.children?.map((child) => (
+                                                <Link
+                                                    key={child.name}
+                                                    href={child.href}
+                                                    onClick={() => !child.isComingSoon && setIsMobileMenuOpen(false)}
+                                                    className={cn(
+                                                        "block px-6 py-3 text-sm font-medium",
+                                                        child.isComingSoon
+                                                            ? "text-stone-400"
+                                                            : "text-stone-600 hover:text-amber-700"
+                                                    )}
+                                                >
+                                                    <div className="flex justify-between items-center">
+                                                        <span>{child.name}</span>
+                                                        {child.isComingSoon && (
+                                                            <span className="text-[10px] uppercase font-bold text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full border border-stone-200">
+                                                                Soon
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    </>
+                                ) : (
+                                    <Link
+                                        href={link.href}
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                        className="block px-3 py-4 text-base font-medium text-stone-800 hover:text-amber-700 hover:bg-stone-50"
+                                    >
+                                        {link.name}
+                                    </Link>
+                                )}
+                            </div>
                         ))}
-                        <Link
-                            href="/account"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            className="block px-3 py-2 rounded-md text-base font-medium text-stone-700 hover:text-amber-700 hover:bg-stone-50"
-                        >
-                            My Account
-                        </Link>
+                        <div className="pt-4 pb-6 px-3 border-t border-stone-100 mt-4">
+                            {user ? (
+                                <div className="space-y-4">
+                                    <div className="px-4 py-2 font-medium text-stone-800">Hi, {user.name}</div>
+                                    <button
+                                        onClick={() => {
+                                            logout();
+                                            setIsMobileMenuOpen(false);
+                                        }}
+                                        className="flex items-center w-full px-4 py-3 text-red-600 border border-stone-200 rounded-lg hover:bg-stone-50"
+                                    >
+                                        <LogOut className="w-5 h-5 mr-2" />
+                                        Logout
+                                    </button>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={() => {
+                                        openModal('LOGIN');
+                                        setIsMobileMenuOpen(false);
+                                    }}
+                                    className="flex items-center justify-center w-full px-4 py-3 border border-stone-200 rounded-lg text-base font-medium text-stone-700 hover:bg-stone-50 hover:text-amber-700 transition-colors"
+                                >
+                                    <User className="w-5 h-5 mr-2" />
+                                    Login / Account
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}

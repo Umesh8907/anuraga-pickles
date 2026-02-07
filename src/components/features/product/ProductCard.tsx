@@ -3,38 +3,38 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { Heart, ShoppingBag } from 'lucide-react'
-import { useCartStore } from '@/store/useCartStore'
 import { cn } from '@/lib/utils'
-
-interface Product {
-    id: string
-    name: string
-    image: string
-    price: number
-    mrp: number
-    sizes: string[]
-    tag?: string
-}
+import { Product } from '@/types'
+import { useAddToCart } from '@/hooks/useCart'
 
 interface ProductCardProps {
     product: Product
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-    const [selectedSize, setSelectedSize] = useState(product.sizes[0])
     const [isWishlisted, setIsWishlisted] = useState(false)
-    const addItem = useCartStore((state) => state.addItem)
+    const { mutate: addToCart } = useAddToCart();
 
-    const discount = Math.round(((product.mrp - product.price) / product.mrp) * 100)
+    // Get default variant or first variant
+    const defaultVariant = product.variants.find(v => v.isDefault) || product.variants[0];
+
+    const mainImage = product.images?.[0] || 'https://placehold.co/600x400?text=No+Image';
+
+    const price = defaultVariant?.price || 0;
+    const mrp = defaultVariant?.mrp || price;
+    const discount = mrp > price
+        ? Math.round(((mrp - price) / mrp) * 100)
+        : 0;
 
     const handleAddToCart = (e: React.MouseEvent) => {
-        e.preventDefault() // Prevent navigation if wrapped in Link
-        addItem({
-            ...product,
-            selectedSize,
+        e.preventDefault()
+        if (!defaultVariant) return;
+
+        addToCart({
+            productId: product._id,
+            variantId: defaultVariant._id,
             quantity: 1
-        })
-        // Optional: Add toast notification here
+        });
     }
 
     const toggleWishlist = (e: React.MouseEvent) => {
@@ -44,17 +44,17 @@ export default function ProductCard({ product }: ProductCardProps) {
 
     return (
         <div className="group bg-white rounded-xl overflow-hidden border border-stone-100 hover:border-amber-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full relative">
-            <Link href={`/products/${product.id}`} className="block relative h-64 overflow-hidden">
+            <Link href={`/products/${product.slug}`} className="block relative h-64 overflow-hidden">
                 <img
-                    src={product.image}
+                    src={mainImage}
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
 
-                {/* Tag */}
-                {product.tag && (
+                {/* Collections as tags */}
+                {product.collections && product.collections[0] && (
                     <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-amber-800 text-[10px] font-bold px-2 py-1 rounded-sm uppercase tracking-wider shadow-sm">
-                        {product.tag}
+                        {typeof product.collections[0] === 'string' ? product.collections[0] : product.collections[0].name}
                     </span>
                 )}
 
@@ -68,7 +68,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             </Link>
 
             <div className="p-5 flex flex-col flex-grow">
-                <Link href={`/products/${product.id}`}>
+                <Link href={`/products/${product.slug}`}>
                     <h3 className="text-lg font-bold text-stone-800 mb-1 line-clamp-1 group-hover:text-amber-700 transition-colors">
                         {product.name}
                     </h3>
@@ -76,34 +76,23 @@ export default function ProductCard({ product }: ProductCardProps) {
 
                 {/* Price Section */}
                 <div className="flex items-baseline gap-2 mb-4">
-                    <span className="text-lg font-bold text-stone-900">₹{product.price}</span>
-                    <span className="text-sm text-stone-400 line-through">₹{product.mrp}</span>
-                    <span className="text-xs font-bold text-green-600">({discount}% OFF)</span>
+                    <span className="text-lg font-bold text-stone-900">₹{price}</span>
+                    {discount > 0 && (
+                        <>
+                            <span className="text-sm text-stone-400 line-through">₹{mrp}</span>
+                            <span className="text-xs font-bold text-green-600">({discount}% OFF)</span>
+                        </>
+                    )}
                 </div>
 
-                {/* Size Selection */}
-                <div className="mb-4">
-                    <p className="text-xs text-stone-500 mb-2 font-medium uppercase tracking-wide">Select Size</p>
-                    <div className="flex flex-wrap gap-2">
-                        {product.sizes.map((size) => (
-                            <button
-                                key={size}
-                                onClick={(e) => {
-                                    e.preventDefault()
-                                    setSelectedSize(size)
-                                }}
-                                className={cn(
-                                    "px-3 py-1 text-xs rounded-md border transition-all",
-                                    selectedSize === size
-                                        ? "bg-amber-100 border-amber-500 text-amber-900 font-medium"
-                                        : "bg-white border-stone-200 text-stone-600 hover:border-amber-300"
-                                )}
-                            >
-                                {size}
-                            </button>
-                        ))}
+                {/* Default Variant Label */}
+                {defaultVariant && (
+                    <div className="mb-4">
+                        <span className="px-2 py-1 text-xs rounded-md bg-stone-100 text-stone-600 border border-stone-200">
+                            {defaultVariant.label}
+                        </span>
                     </div>
-                </div>
+                )}
 
                 {/* Add to Cart */}
                 <div className="mt-auto pt-2">

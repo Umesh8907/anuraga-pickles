@@ -1,15 +1,16 @@
-import { create } from 'zustand'
+import { create } from 'zustand';
+import { Cart } from '@/types';
 
+// The store now mainly acts as a client-side cache or UI state holder
+// Logic is shifted to React Query for server state
 interface CartState {
-    items: any[]
-    addItem: (item: any) => void
-    removeItem: (id: string) => void
-    clearCart: () => void
+    isOpen: boolean;
+    toggleCart: () => void;
+    // We can keep these for optimistic UI or local-only actions if needed
+    // or simply remove them if relying purely on React Query cache
 }
 
 export const useCartStore = create<CartState>((set) => ({
-    items: [],
-    addItem: (item) => set((state) => ({ items: [...state.items, item] })),
-    removeItem: (id) => set((state) => ({ items: state.items.filter((i: any) => i.id !== id) })),
-    clearCart: () => set({ items: [] }),
-}))
+    isOpen: false,
+    toggleCart: () => set((state) => ({ isOpen: !state.isOpen })),
+}));
