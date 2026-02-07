@@ -126,6 +126,14 @@ export interface AuthResponse {
 }
 
 
+export interface Wishlist {
+    _id: string;
+    user: string;
+    products: Product[];
+    createdAt?: string;
+    updatedAt?: string;
+}
+
 export interface ApiError {
     message: string;
     status: number;

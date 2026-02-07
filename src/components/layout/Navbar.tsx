@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ShoppingBag, Menu, X, User, Search, LogOut } from 'lucide-react'
+import { ShoppingBag, Menu, X, User, Search, LogOut, Heart } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useCart } from '@/hooks/useCart'
 import { useUser, useLogout } from '@/hooks/useAuth'
@@ -151,16 +151,20 @@ export default function Navbar() {
 
                     {/* Icons / Actions */}
                     <div className="flex items-center space-x-4 sm:space-x-6">
-                        <button className="text-stone-600 hover:text-amber-700 transition-colors p-1">
+                        <button className="text-stone-600 hover:text-brand-teal transition-colors p-1">
                             <Search className="w-5 h-5" />
                         </button>
+
+                        <Link href="/wishlist" className="text-stone-600 hover:text-red-500 transition-colors p-1 relative group">
+                            <Heart className="w-5 h-5 group-hover:fill-current" />
+                        </Link>
 
                         <div className="hidden sm:flex items-center border-l border-stone-200 pl-6 space-x-6">
                             {user ? (
                                 <div className="flex items-center space-x-4">
                                     <Link
                                         href="/account"
-                                        className="flex items-center space-x-2 text-stone-600 hover:text-amber-700 transition-colors"
+                                        className="flex items-center space-x-2 text-stone-600 hover:text-brand-teal transition-colors"
                                     >
                                         <User className="w-5 h-5" />
                                         <span className="text-sm font-medium">Hi, {user.name?.split(' ')[0]}</span>
@@ -172,7 +176,7 @@ export default function Navbar() {
                             ) : (
                                 <button
                                     onClick={() => openModal('LOGIN')}
-                                    className="flex items-center space-x-1 text-stone-600 hover:text-amber-700 transition-colors"
+                                    className="flex items-center space-x-1 text-stone-600 hover:text-brand-teal transition-colors"
                                 >
                                     <User className="w-5 h-5" />
                                     <span className="text-sm font-medium">Login</span>

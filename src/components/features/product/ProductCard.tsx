@@ -6,16 +6,26 @@ import { Heart, ShoppingBag } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Product } from '@/types'
 import { useAddToCart } from '@/hooks/useCart'
+import { useWishlist, useAddToWishlist, useRemoveFromWishlist } from '@/hooks/useWishlist'
+import { useAuthModalStore } from '@/store/useAuthModalStore'
+import { useUser } from '@/hooks/useAuth'
 
 interface ProductCardProps {
     product: Product
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-    const defaultVariant = product.variants.find(v => v.isDefault) || product.variants[0];
+    const defaultVariant = product.variants?.find(v => v.isDefault) || product.variants?.[0];
     const [selectedVariant, setSelectedVariant] = useState(defaultVariant)
-    const [isWishlisted, setIsWishlisted] = useState(false)
+
+    const { data: user } = useUser();
+    const { data: wishlist } = useWishlist();
+    const { mutate: addToWishlist } = useAddToWishlist();
+    const { mutate: removeFromWishlist } = useRemoveFromWishlist();
+    const { openModal } = useAuthModalStore();
     const { mutate: addToCart } = useAddToCart();
+
+    const isWishlisted = wishlist?.products.some(p => p._id === product._id) || false;
 
     const mainImage = product.images?.[0] || 'https://placehold.co/600x400?text=No+Image';
 
@@ -38,11 +48,20 @@ export default function ProductCard({ product }: ProductCardProps) {
 
     const toggleWishlist = (e: React.MouseEvent) => {
         e.preventDefault()
-        setIsWishlisted(!isWishlisted)
+        if (!user) {
+            openModal('LOGIN');
+            return;
+        }
+
+        if (isWishlisted) {
+            removeFromWishlist(product._id);
+        } else {
+            addToWishlist(product._id);
+        }
     }
 
     return (
-        <div className="group bg-white rounded-xl overflow-hidden border border-stone-100 hover:border-amber-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full relative">
+        <div className="group bg-white rounded-xl overflow-hidden border border-stone-100 hover:border-brand-teal shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full relative">
             <Link href={`/products/${product.slug}`} className="block relative h-64 overflow-hidden">
                 <img
                     src={mainImage}
@@ -68,7 +87,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
             <div className="p-5 flex flex-col flex-grow">
                 <Link href={`/products/${product.slug}`}>
-                    <h3 className="text-lg font-bold text-stone-800 mb-1 line-clamp-1 group-hover:text-amber-700 transition-colors">
+                    <h3 className="text-lg font-bold text-stone-800 mb-1 line-clamp-1 group-hover:text-brand-teal transition-colors">
                         {product.name}
                     </h3>
                 </Link>
@@ -85,7 +104,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 </div>
 
                 {/* Variant Selector (Size Chooser) */}
-                {product.variants && product.variants.length > 0 && (
+                {product.variants && product.variants.length > 0 ? (
                     <div className="mb-4">
                         <div className="flex flex-wrap gap-2">
                             {product.variants.map((variant) => (
@@ -98,8 +117,8 @@ export default function ProductCard({ product }: ProductCardProps) {
                                     className={cn(
                                         "px-2.5 py-1 text-xs font-bold rounded-md transition-all border",
                                         selectedVariant?._id === variant._id
-                                            ? "bg-amber-100 text-amber-900 border-amber-300 shadow-sm"
-                                            : "bg-white text-stone-600 border-stone-200 hover:border-amber-200 hover:bg-amber-50/50"
+                                            ? "bg-brand-amber text-white border-brand-amber shadow-sm"
+                                            : "bg-white text-stone-600 border-stone-200 hover:border-brand-teal hover:bg-stone-50"
                                     )}
                                 >
                                     {variant.label}
@@ -107,6 +126,8 @@ export default function ProductCard({ product }: ProductCardProps) {
                             ))}
                         </div>
                     </div>
+                ) : (
+                    <div className="mb-4 h-6"></div> // Placeholder for spacing
                 )}
 
                 {/* Add to Cart */}
@@ -118,7 +139,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                             "w-full flex items-center justify-center gap-2 py-2.5 rounded-lg transition-colors font-medium text-sm",
                             (!selectedVariant || selectedVariant.stock <= 0)
                                 ? "bg-stone-100 text-stone-400 cursor-not-allowed"
-                                : "bg-stone-900 hover:bg-amber-600 text-white"
+                                : "bg-brand-teal hover:brightness-110 text-white shadow-lg shadow-brand-teal/10"
                         )}
                     >
                         {(!selectedVariant || selectedVariant.stock <= 0) ? (
