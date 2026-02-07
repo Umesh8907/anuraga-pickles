@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ShoppingBag, Menu, X, User, Search, LogOut } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useCart } from '@/hooks/useCart'
@@ -35,7 +36,7 @@ export default function Navbar() {
             isDropdown: true,
             children: [
                 { name: 'All Products', href: '/collections/all-products' },
-                ...(collections?.map(col => ({
+                ...(collections?.filter(col => col.slug !== 'all-products').map(col => ({
                     name: col.name,
                     href: `/collections/${col.slug}`
                 })) || [
@@ -74,8 +75,20 @@ export default function Navbar() {
                 <div className="flex justify-between items-center h-20">
                     {/* Logo */}
                     <div className="flex-shrink-0 flex items-center">
-                        <Link href="/" className="text-2xl font-extrabold text-amber-700 tracking-tighter">
-                            Anuraga<span className="text-stone-800">Pickles</span>
+                        <Link href="/" className="flex items-center gap-3 group">
+                            <div className="relative h-12 w-12 transition-transform duration-500 group-hover:scale-110">
+                                <Image
+                                    src="/logo.png"
+                                    alt="Anuraga Logo"
+                                    fill
+                                    className="object-contain"
+                                    priority
+                                />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-xl font-black text-brand-teal tracking-tighter leading-none">ANURAGA</span>
+                                <span className="text-[10px] font-bold text-brand-amber tracking-[0.2em] uppercase leading-none mt-1">Taste of Love</span>
+                            </div>
                         </Link>
                     </div>
 
@@ -84,7 +97,7 @@ export default function Navbar() {
                         {navLinks.map((link) => (
                             <div key={link.name} className="relative group">
                                 {link.isDropdown ? (
-                                    <button className="flex items-center text-stone-600 hover:text-amber-700 font-medium transition-colors py-2">
+                                    <button className="flex items-center text-stone-600 hover:text-brand-teal font-medium transition-colors py-2">
                                         {link.name}
                                         <svg
                                             className="w-4 h-4 ml-1 transform group-hover:rotate-180 transition-transform duration-200"
@@ -110,7 +123,7 @@ export default function Navbar() {
                                         <div className="bg-white border border-stone-100 rounded-lg shadow-xl overflow-hidden">
                                             {link.children.map((child) => (
                                                 <Link
-                                                    key={child.name}
+                                                    key={child.href + child.name}
                                                     href={child.href}
                                                     className={cn(
                                                         "block px-4 py-3 text-sm transition-colors hover:bg-stone-50",
@@ -145,9 +158,15 @@ export default function Navbar() {
                         <div className="hidden sm:flex items-center border-l border-stone-200 pl-6 space-x-6">
                             {user ? (
                                 <div className="flex items-center space-x-4">
-                                    <span className="text-sm font-medium text-stone-700">Hi, {user.name}</span>
-                                    <button onClick={() => logout()} className="text-stone-600 hover:text-red-600 transition-colors" title="Logout">
-                                        <LogOut className="w-5 h-5" />
+                                    <Link
+                                        href="/account"
+                                        className="flex items-center space-x-2 text-stone-600 hover:text-amber-700 transition-colors"
+                                    >
+                                        <User className="w-5 h-5" />
+                                        <span className="text-sm font-medium">Hi, {user.name?.split(' ')[0]}</span>
+                                    </Link>
+                                    <button onClick={() => logout()} className="text-stone-400 hover:text-red-600 transition-colors" title="Logout">
+                                        <LogOut className="w-4 h-4" />
                                     </button>
                                 </div>
                             ) : (
@@ -220,7 +239,7 @@ export default function Navbar() {
                                         >
                                             {link.children?.map((child) => (
                                                 <Link
-                                                    key={child.name}
+                                                    key={child.href + child.name}
                                                     href={child.href}
                                                     onClick={() => !child.isComingSoon && setIsMobileMenuOpen(false)}
                                                     className={cn(

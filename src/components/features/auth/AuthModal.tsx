@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import { X, Phone, Lock, User, ArrowRight, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react'
+import Image from 'next/image'
 import { useLogin, useRegister } from '@/hooks/useAuth'
 import { useAuthModalStore } from '@/store/useAuthModalStore'
 import { cn } from '@/lib/utils'
@@ -65,6 +66,14 @@ export default function AuthModal() {
                     {view === 'LOGIN' ? (
                         <div className="space-y-6">
                             <div className="text-center">
+                                <div className="relative w-16 h-16 mx-auto mb-4">
+                                    <Image
+                                        src="/logo.png"
+                                        alt="Anuraga"
+                                        fill
+                                        className="object-contain"
+                                    />
+                                </div>
                                 <h2 className="text-2xl font-extrabold text-stone-900 not-italic">Welcome Back</h2>
                                 <p className="text-sm text-stone-500 mt-2 font-medium">Spicing up your life, one jar at a time.</p>
                             </div>
@@ -79,7 +88,7 @@ export default function AuthModal() {
                             <form onSubmit={handleLogin} className="space-y-4 not-italic">
                                 <div className="space-y-4">
                                     <div className="relative group">
-                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-stone-400 group-focus-within:text-amber-600">
+                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-stone-400 group-focus-within:text-brand-teal">
                                             <Phone className="h-4 w-4" />
                                         </div>
                                         <input
@@ -87,12 +96,12 @@ export default function AuthModal() {
                                             required
                                             value={loginPhone}
                                             onChange={(e) => setLoginPhone(e.target.value)}
-                                            className="block w-full pl-11 pr-4 py-3 border border-stone-200 rounded-xl text-stone-900 text-sm focus:ring-2 focus:ring-amber-500 outline-none transition-all"
+                                            className="block w-full pl-11 pr-4 py-3 border border-stone-200 rounded-xl text-stone-900 text-sm focus:ring-2 focus:ring-brand-teal outline-none transition-all"
                                             placeholder="Phone Number"
                                         />
                                     </div>
                                     <div className="relative group">
-                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-stone-400 group-focus-within:text-amber-600">
+                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-stone-400 group-focus-within:text-brand-teal">
                                             <Lock className="h-4 w-4" />
                                         </div>
                                         <input
@@ -100,7 +109,7 @@ export default function AuthModal() {
                                             required
                                             value={loginPassword}
                                             onChange={(e) => setLoginPassword(e.target.value)}
-                                            className="block w-full pl-11 pr-4 py-3 border border-stone-200 rounded-xl text-stone-900 text-sm focus:ring-2 focus:ring-amber-500 outline-none transition-all"
+                                            className="block w-full pl-11 pr-4 py-3 border border-stone-200 rounded-xl text-stone-900 text-sm focus:ring-2 focus:ring-brand-teal outline-none transition-all"
                                             placeholder="Password"
                                         />
                                     </div>
@@ -109,7 +118,7 @@ export default function AuthModal() {
                                 <button
                                     type="submit"
                                     disabled={isLoginPending}
-                                    className="w-full bg-stone-900 text-white font-bold py-3.5 rounded-xl hover:bg-amber-600 transition-all flex items-center justify-center gap-2 shadow-lg shadow-stone-100"
+                                    className="w-full bg-brand-teal text-white font-bold py-3.5 rounded-xl hover:brightness-110 transition-all flex items-center justify-center gap-2 shadow-lg shadow-stone-100"
                                 >
                                     {isLoginPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Login <ArrowRight className="w-4 h-4" /></>}
                                 </button>
@@ -120,7 +129,7 @@ export default function AuthModal() {
                                     New to Anuraga?{' '}
                                     <button
                                         onClick={() => setView('REGISTER')}
-                                        className="text-amber-700 font-extrabold hover:underline"
+                                        className="text-brand-amber font-extrabold hover:underline"
                                     >
                                         Create account
                                     </button>
@@ -144,7 +153,7 @@ export default function AuthModal() {
                             <form onSubmit={handleRegister} className="space-y-4 not-italic">
                                 <div className="space-y-4">
                                     <div className="relative group">
-                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-stone-400 group-focus-within:text-amber-600">
+                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-stone-400 group-focus-within:text-brand-teal">
                                             <User className="h-4 w-4" />
                                         </div>
                                         <input
@@ -152,12 +161,12 @@ export default function AuthModal() {
                                             required
                                             value={regName}
                                             onChange={(e) => setRegName(e.target.value)}
-                                            className="block w-full pl-11 pr-4 py-3 border border-stone-200 rounded-xl text-stone-900 text-sm focus:ring-2 focus:ring-amber-500 outline-none transition-all"
+                                            className="block w-full pl-11 pr-4 py-3 border border-stone-200 rounded-xl text-stone-900 text-sm focus:ring-2 focus:ring-brand-teal outline-none transition-all"
                                             placeholder="Full Name"
                                         />
                                     </div>
                                     <div className="relative group">
-                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-stone-400 group-focus-within:text-amber-600">
+                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-stone-400 group-focus-within:text-brand-teal">
                                             <Phone className="h-4 w-4" />
                                         </div>
                                         <input
@@ -165,12 +174,12 @@ export default function AuthModal() {
                                             required
                                             value={regPhone}
                                             onChange={(e) => setRegPhone(e.target.value)}
-                                            className="block w-full pl-11 pr-4 py-3 border border-stone-200 rounded-xl text-stone-900 text-sm focus:ring-2 focus:ring-amber-500 outline-none transition-all"
+                                            className="block w-full pl-11 pr-4 py-3 border border-stone-200 rounded-xl text-stone-900 text-sm focus:ring-2 focus:ring-brand-teal outline-none transition-all"
                                             placeholder="Phone Number"
                                         />
                                     </div>
                                     <div className="relative group">
-                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-stone-400 group-focus-within:text-amber-600">
+                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-stone-400 group-focus-within:text-brand-teal">
                                             <Lock className="h-4 w-4" />
                                         </div>
                                         <input
@@ -191,7 +200,7 @@ export default function AuthModal() {
                                 <button
                                     type="submit"
                                     disabled={isRegPending}
-                                    className="w-full bg-amber-600 text-white font-bold py-3.5 rounded-xl hover:bg-amber-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-50"
+                                    className="w-full bg-brand-teal text-white font-bold py-3.5 rounded-xl hover:brightness-110 transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-50"
                                 >
                                     {isRegPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Join Now <ArrowRight className="w-4 h-4" /></>}
                                 </button>
@@ -202,7 +211,7 @@ export default function AuthModal() {
                                     Part of family already?{' '}
                                     <button
                                         onClick={() => setView('LOGIN')}
-                                        className="text-amber-700 font-extrabold hover:underline"
+                                        className="text-brand-amber font-extrabold hover:underline"
                                     >
                                         Login here
                                     </button>

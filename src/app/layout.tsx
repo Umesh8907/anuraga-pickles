@@ -5,6 +5,7 @@ import Providers from "@/components/providers";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import AuthModal from "@/components/features/auth/AuthModal";
+import FloatingCart from "@/components/features/cart/FloatingCart";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,15 +28,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
       >
         <Providers>
           <Navbar />
           {children}
           <Footer />
           <AuthModal />
+          <FloatingCart />
         </Providers>
       </body>
     </html>

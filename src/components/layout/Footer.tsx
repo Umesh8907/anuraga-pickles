@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Facebook, Instagram, Twitter } from 'lucide-react'
 
 export default function Footer() {
@@ -8,14 +9,27 @@ export default function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     {/* Brand Info */}
                     <div>
-                        <h3 className="text-xl font-bold text-amber-500 mb-4">Anuraga Pickles</h3>
-                        <p className="text-sm text-stone-400 mb-6">
+                        <Link href="/" className="flex items-center gap-3 mb-6 group">
+                            <div className="relative h-10 w-10">
+                                <Image
+                                    src="/logo.png"
+                                    alt="Anuraga Logo"
+                                    fill
+                                    className="object-contain brightness-0 invert"
+                                />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-lg font-black text-white tracking-tighter leading-none">ANURAGA</span>
+                                <span className="text-[8px] font-bold text-brand-amber tracking-[0.2em] uppercase leading-none mt-1">Taste of Love</span>
+                            </div>
+                        </Link>
+                        <p className="text-sm text-stone-400 mb-6 italic">
                             Bringing authentic South Indian flavors to your doorstep. Handmade with love and traditional recipes.
                         </p>
                         <div className="flex space-x-4">
-                            <a href="#" className="text-stone-400 hover:text-amber-500 transition"><Facebook className="w-5 h-5" /></a>
-                            <a href="#" className="text-stone-400 hover:text-amber-500 transition"><Instagram className="w-5 h-5" /></a>
-                            <a href="#" className="text-stone-400 hover:text-amber-500 transition"><Twitter className="w-5 h-5" /></a>
+                            <a href="#" className="text-stone-400 hover:text-brand-amber transition"><Facebook className="w-5 h-5" /></a>
+                            <a href="#" className="text-stone-400 hover:text-brand-amber transition"><Instagram className="w-5 h-5" /></a>
+                            <a href="#" className="text-stone-400 hover:text-brand-amber transition"><Twitter className="w-5 h-5" /></a>
                         </div>
                     </div>
 
@@ -23,10 +37,10 @@ export default function Footer() {
                     <div>
                         <h4 className="text-lg font-semibold text-white mb-4">Shop</h4>
                         <ul className="space-y-2">
-                            <li><Link href="/collections/all-products" className="hover:text-amber-500 transition">All Products</Link></li>
-                            <li><Link href="/collections/mango-pickles" className="hover:text-amber-500 transition">Pickles</Link></li>
-                            <li><Link href="/collections/spices" className="hover:text-amber-500 transition">Spices & Powders</Link></li>
-                            <li><Link href="/collections/festive-deals" className="hover:text-amber-500 transition">Festive Deals</Link></li>
+                            <li><Link href="/collections/all-products" className="hover:text-brand-amber transition">All Products</Link></li>
+                            <li><Link href="/collections/mango-pickles" className="hover:text-brand-amber transition">Pickles</Link></li>
+                            <li><Link href="/collections/spices" className="hover:text-brand-amber transition">Spices & Powders</Link></li>
+                            <li><Link href="/collections/festive-deals" className="hover:text-brand-amber transition">Festive Deals</Link></li>
                         </ul>
                     </div>
 
@@ -34,10 +48,10 @@ export default function Footer() {
                     <div>
                         <h4 className="text-lg font-semibold text-white mb-4">Support</h4>
                         <ul className="space-y-2">
-                            <li><Link href="#" className="hover:text-amber-500 transition">Contact Us</Link></li>
-                            <li><Link href="#" className="hover:text-amber-500 transition">Shipping Policy</Link></li>
-                            <li><Link href="#" className="hover:text-amber-500 transition">Returns & Refunds</Link></li>
-                            <li><Link href="#" className="hover:text-amber-500 transition">FAQs</Link></li>
+                            <li><Link href="#" className="hover:text-brand-amber transition">Contact Us</Link></li>
+                            <li><Link href="#" className="hover:text-brand-amber transition">Shipping Policy</Link></li>
+                            <li><Link href="#" className="hover:text-brand-amber transition">Returns & Refunds</Link></li>
+                            <li><Link href="#" className="hover:text-brand-amber transition">FAQs</Link></li>
                         </ul>
                     </div>
 
@@ -49,11 +63,11 @@ export default function Footer() {
                             <input
                                 type="email"
                                 placeholder="Your email address"
-                                className="bg-stone-800 border border-stone-700 rounded px-4 py-2 text-white focus:outline-none focus:border-amber-500"
+                                className="bg-stone-800 border border-stone-700 rounded px-4 py-2 text-white focus:outline-none focus:border-brand-amber"
                             />
                             <button
                                 type="button"
-                                className="bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700 transition font-medium"
+                                className="bg-brand-amber text-white px-4 py-2 rounded hover:brightness-110 transition font-medium"
                             >
                                 Subscribe
                             </button>

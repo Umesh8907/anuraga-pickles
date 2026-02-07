@@ -4,6 +4,7 @@ import React from 'react'
 import Link from 'next/link'
 import { Trash2, Plus, Minus, ArrowRight, ShoppingCart } from 'lucide-react'
 import { useCart, useRemoveFromCart, useUpdateCartItem } from '@/hooks/useCart'
+import { cn } from '@/lib/utils'
 
 export default function CartPage() {
     const { data: cartData, isLoading } = useCart();

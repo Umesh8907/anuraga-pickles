@@ -12,27 +12,26 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
+    const defaultVariant = product.variants.find(v => v.isDefault) || product.variants[0];
+    const [selectedVariant, setSelectedVariant] = useState(defaultVariant)
     const [isWishlisted, setIsWishlisted] = useState(false)
     const { mutate: addToCart } = useAddToCart();
 
-    // Get default variant or first variant
-    const defaultVariant = product.variants.find(v => v.isDefault) || product.variants[0];
-
     const mainImage = product.images?.[0] || 'https://placehold.co/600x400?text=No+Image';
 
-    const price = defaultVariant?.price || 0;
-    const mrp = defaultVariant?.mrp || price;
+    const price = selectedVariant?.price || 0;
+    const mrp = selectedVariant?.mrp || price;
     const discount = mrp > price
         ? Math.round(((mrp - price) / mrp) * 100)
         : 0;
 
     const handleAddToCart = (e: React.MouseEvent) => {
         e.preventDefault()
-        if (!defaultVariant) return;
+        if (!selectedVariant) return;
 
         addToCart({
             productId: product._id,
-            variantId: defaultVariant._id,
+            variantId: selectedVariant._id,
             quantity: 1
         });
     }
@@ -85,12 +84,28 @@ export default function ProductCard({ product }: ProductCardProps) {
                     )}
                 </div>
 
-                {/* Default Variant Label */}
-                {defaultVariant && (
+                {/* Variant Selector (Size Chooser) */}
+                {product.variants && product.variants.length > 0 && (
                     <div className="mb-4">
-                        <span className="px-2 py-1 text-xs rounded-md bg-stone-100 text-stone-600 border border-stone-200">
-                            {defaultVariant.label}
-                        </span>
+                        <div className="flex flex-wrap gap-2">
+                            {product.variants.map((variant) => (
+                                <button
+                                    key={variant._id}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        setSelectedVariant(variant);
+                                    }}
+                                    className={cn(
+                                        "px-2.5 py-1 text-xs font-bold rounded-md transition-all border",
+                                        selectedVariant?._id === variant._id
+                                            ? "bg-amber-100 text-amber-900 border-amber-300 shadow-sm"
+                                            : "bg-white text-stone-600 border-stone-200 hover:border-amber-200 hover:bg-amber-50/50"
+                                    )}
+                                >
+                                    {variant.label}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 )}
 
@@ -98,10 +113,22 @@ export default function ProductCard({ product }: ProductCardProps) {
                 <div className="mt-auto pt-2">
                     <button
                         onClick={handleAddToCart}
-                        className="w-full flex items-center justify-center gap-2 bg-stone-900 hover:bg-amber-600 text-white py-2.5 rounded-lg transition-colors font-medium text-sm"
+                        disabled={!selectedVariant || selectedVariant.stock <= 0}
+                        className={cn(
+                            "w-full flex items-center justify-center gap-2 py-2.5 rounded-lg transition-colors font-medium text-sm",
+                            (!selectedVariant || selectedVariant.stock <= 0)
+                                ? "bg-stone-100 text-stone-400 cursor-not-allowed"
+                                : "bg-stone-900 hover:bg-amber-600 text-white"
+                        )}
                     >
-                        <ShoppingBag className="w-4 h-4" />
-                        Add to Cart
+                        {(!selectedVariant || selectedVariant.stock <= 0) ? (
+                            "Out of Stock"
+                        ) : (
+                            <>
+                                <ShoppingBag className="w-4 h-4" />
+                                Add to Cart
+                            </>
+                        )}
                     </button>
                 </div>
             </div>
