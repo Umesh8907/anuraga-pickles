@@ -40,7 +40,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         if (!selectedVariant) return;
 
         addToCart({
-            productId: product._id,
+            product: product,
             variantId: selectedVariant._id,
             quantity: 1
         });

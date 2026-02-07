@@ -6,6 +6,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import AuthModal from "@/components/features/auth/AuthModal";
 import FloatingCart from "@/components/features/cart/FloatingCart";
+import CartSync from "@/components/features/cart/CartSync";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,6 +40,7 @@ export default function RootLayout({
           <Footer />
           <AuthModal />
           <FloatingCart />
+          <CartSync />
         </Providers>
       </body>
     </html>

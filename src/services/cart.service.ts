@@ -25,6 +25,11 @@ const cartService = {
         const response = await api.put<{ success: boolean; data: Cart }>(`/cart/${cartItemId}`, { quantity });
         return response.data.data;
     },
+
+    async syncCart(items: { productId: string; variantId: string; quantity: number }[]): Promise<Cart> {
+        const response = await api.post<{ success: boolean; data: Cart }>('/cart/sync', { items });
+        return response.data.data;
+    },
 };
 
 export default cartService;
