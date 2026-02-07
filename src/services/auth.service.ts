@@ -2,12 +2,12 @@ import api from '@/lib/axios';
 import { User, AuthResponse } from '@/types';
 
 const authService = {
-    async login(credentials: { phone: string; password: string }): Promise<AuthResponse> {
+    async login(credentials: { phone: string; password: string; role?: string }): Promise<AuthResponse> {
         const response = await api.post<{ success: boolean; data: AuthResponse }>('/auth/login', credentials);
         return response.data.data;
     },
 
-    async register(data: { phone: string; password: string; name: string }): Promise<AuthResponse> {
+    async register(data: { phone: string; password: string; name: string; role?: string }): Promise<AuthResponse> {
         const response = await api.post<{ success: boolean; data: AuthResponse }>('/auth/register', data);
         return response.data.data;
     },

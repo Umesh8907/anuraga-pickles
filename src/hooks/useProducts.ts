@@ -9,11 +9,14 @@ export const useProducts = (params?: any, options?: { enabled?: boolean }) => {
     });
 };
 
-export const useProduct = (slug: string) => {
-    return useQuery({
+import { Product } from '@/types';
+
+export const useProduct = (slug: string, initialData?: Product | null) => {
+    return useQuery<Product>({
         queryKey: ['product', slug],
         queryFn: () => productService.getProductBySlug(slug),
         enabled: !!slug,
+        initialData: initialData as Product // Cast if necessary, or let it infer if types match
     });
 };
 

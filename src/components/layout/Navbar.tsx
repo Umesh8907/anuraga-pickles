@@ -162,6 +162,14 @@ export default function Navbar() {
                         <div className="hidden sm:flex items-center border-l border-stone-200 pl-6 space-x-6">
                             {user ? (
                                 <div className="flex items-center space-x-4">
+                                    {user.role === 'ADMIN' && (
+                                        <Link
+                                            href="/admin/dashboard"
+                                            className="px-3 py-1 bg-amber-100 text-amber-700 text-[10px] font-black uppercase tracking-widest rounded-full hover:bg-amber-200 transition-colors"
+                                        >
+                                            Admin
+                                        </Link>
+                                    )}
                                     <Link
                                         href="/account"
                                         className="flex items-center space-x-2 text-stone-600 hover:text-brand-teal transition-colors"

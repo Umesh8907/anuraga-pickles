@@ -29,7 +29,7 @@ export default function AuthModal() {
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault()
         setLoginError('')
-        login({ phone: loginPhone, password: loginPassword }, {
+        login({ phone: loginPhone, password: loginPassword, role: 'USER' }, {
             onSuccess: () => closeModal(),
             onError: (err: any) => setLoginError(err?.response?.data?.message || 'Invalid credentials')
         })
@@ -38,7 +38,7 @@ export default function AuthModal() {
     const handleRegister = (e: React.FormEvent) => {
         e.preventDefault()
         setRegError('')
-        register({ name: regName, phone: regPhone, password: regPassword }, {
+        register({ name: regName, phone: regPhone, password: regPassword, role: 'USER' }, {
             onSuccess: () => closeModal(),
             onError: (err: any) => setRegError(err?.response?.data?.message || 'Registration failed')
         })

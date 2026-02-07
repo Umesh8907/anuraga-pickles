@@ -22,7 +22,7 @@ export default function FloatingCart() {
     const subtotal = items.reduce((acc, item) => acc + (item.price * item.quantity), 0)
 
     useEffect(() => {
-        if (itemCount > 0 && pathname !== '/cart') {
+        if (itemCount > 0 && pathname !== '/cart' && !pathname.startsWith('/checkout')) {
             setIsVisible(true)
         } else {
             setIsVisible(false)

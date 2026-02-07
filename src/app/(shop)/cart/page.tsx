@@ -154,9 +154,12 @@ export default function CartPage() {
                                 <span className="text-2xl font-extrabold text-amber-700">₹{total.toLocaleString()}</span>
                             </div>
 
-                            <button className="w-full bg-stone-900 hover:bg-amber-600 text-white font-bold py-5 rounded-2xl shadow-xl hover:shadow-amber-200 transition-all duration-300 hoverScale-up active:scale-[0.98]">
+                            <Link
+                                href="/checkout/address"
+                                className="block w-full bg-stone-900 hover:bg-amber-600 text-white font-bold py-5 rounded-2xl shadow-xl hover:shadow-amber-200 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] text-center"
+                            >
                                 Proceed to Checkout
-                            </button>
+                            </Link>
 
                             <div className="mt-8 space-y-4">
                                 <div className="flex items-center gap-3 text-xs text-stone-500 justify-center">

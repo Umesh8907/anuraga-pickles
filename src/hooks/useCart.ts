@@ -3,6 +3,7 @@ import cartService from '@/services/cart.service';
 import guestCartService from '@/services/guestCart.service';
 import { useUser } from '@/hooks/useAuth';
 import { Product } from '@/types';
+import { toast } from 'sonner';
 
 export const useCart = () => {
     const { data: user } = useUser();
@@ -11,6 +12,7 @@ export const useCart = () => {
         queryFn: () => user ? cartService.getCart() : guestCartService.getCart(),
     });
 };
+
 
 export const useAddToCart = () => {
     const queryClient = useQueryClient();
@@ -23,7 +25,11 @@ export const useAddToCart = () => {
                 : guestCartService.addToCart(product, variantId, quantity),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['cart'] });
+            toast.success('Added to cart');
         },
+        onError: () => {
+            toast.error('Failed to add to cart');
+        }
     });
 };
 
@@ -36,7 +42,11 @@ export const useRemoveFromCart = () => {
             user ? cartService.removeFromCart(cartItemId) : guestCartService.removeFromCart(cartItemId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['cart'] });
+            toast.success('Removed from cart');
         },
+        onError: () => {
+            toast.error('Failed to remove from cart');
+        }
     });
 };
 
@@ -49,6 +59,10 @@ export const useUpdateCartItem = () => {
             user ? cartService.updateCartItem(itemId, quantity) : guestCartService.updateCartItem(itemId, quantity),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['cart'] });
+            toast.success('Cart updated');
         },
+        onError: () => {
+            toast.error('Failed to update cart');
+        }
     });
 };

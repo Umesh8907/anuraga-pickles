@@ -4,7 +4,15 @@ import authService from '@/services/auth.service';
 export const useUser = () => {
     return useQuery({
         queryKey: ['user'],
-        queryFn: () => authService.getCurrentUser(),
+        queryFn: async () => {
+            const token = localStorage.getItem('accessToken');
+            if (!token) return null;
+            try {
+                return await authService.getCurrentUser();
+            } catch (error) {
+                return null;
+            }
+        },
         retry: false,
     });
 };
@@ -12,7 +20,7 @@ export const useUser = () => {
 export const useLogin = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: authService.login,
+        mutationFn: (credentials: { phone: string; password: string; role?: string }) => authService.login(credentials),
         onSuccess: (data) => {
             localStorage.setItem('accessToken', data.accessToken);
             localStorage.setItem('refreshToken', data.refreshToken);
@@ -25,7 +33,7 @@ export const useLogin = () => {
 export const useRegister = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: authService.register,
+        mutationFn: (data: { phone: string; password: string; name: string; role?: string }) => authService.register(data),
         onSuccess: (data) => {
             localStorage.setItem('accessToken', data.accessToken);
             localStorage.setItem('refreshToken', data.refreshToken);
