@@ -1,17 +1,26 @@
+import CollectionClient from './CollectionClient'
+
 export default async function CollectionPage({
     params,
 }: {
     params: Promise<{ slug: string }>
 }) {
     const { slug } = await params
+    const title = slug === 'all-products' ? 'All Our Delights' : slug.replace(/-/g, ' ')
+
     return (
-        <div className="max-w-7xl mx-auto p-8">
-            <h1 className="text-3xl font-bold capitalize text-amber-900 mb-8">{slug.replace('-', ' ')} Collection</h1>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-stone-200 h-64 flex items-center justify-center text-stone-400">
-                    Product Placeholder
+        <div className="bg-stone-50 min-h-screen pt-24 pb-20">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="mb-12 text-center sm:text-left">
+                    <h1 className="text-3xl md:text-4xl font-extrabold text-stone-900 capitalize tracking-tight">
+                        {title}
+                    </h1>
+                    <p className="text-stone-600 mt-2 font-medium italic max-w-2xl">
+                        Handcrafted with tradition and the finest ingredients. Explore our authentic flavors.
+                    </p>
                 </div>
-                {/* Dynamic product list would go here */}
+
+                <CollectionClient slug={slug} />
             </div>
         </div>
     )

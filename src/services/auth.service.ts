@@ -20,6 +20,11 @@ const authService = {
         const response = await api.get<{ success: boolean; data: User }>('/users/me');
         return response.data.data;
     },
+
+    async refreshToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
+        const response = await api.post<{ success: boolean; data: { accessToken: string; refreshToken: string } }>('/auth/refresh', { refreshToken });
+        return response.data.data;
+    },
 };
 
 export default authService;

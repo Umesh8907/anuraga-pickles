@@ -15,6 +15,15 @@ export interface ProductVariant {
     isDefault: boolean;
 }
 
+export interface Collection {
+    _id: string;
+    name: string;
+    slug: string;
+    description?: string;
+    bannerImage?: string;
+    isActive: boolean;
+}
+
 export interface Product {
     _id: string;
     name: string;

@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 import { useCart } from '@/hooks/useCart'
 import { useUser, useLogout } from '@/hooks/useAuth'
 import { useAuthModalStore } from '@/store/useAuthModalStore'
+import { useCollections } from '@/hooks/useCollections'
 
 export default function Navbar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -17,6 +18,7 @@ export default function Navbar() {
     const { data: cart } = useCart();
     const { data: user } = useUser();
     const { mutate: logout } = useLogout();
+    const { data: collections } = useCollections();
 
     const { openModal } = useAuthModalStore();
     const cartItemCount = cart?.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
@@ -33,9 +35,14 @@ export default function Navbar() {
             isDropdown: true,
             children: [
                 { name: 'All Products', href: '/collections/all-products' },
-                { name: 'Pickles', href: '/collections/pickles' },
-                { name: 'Cold-Pressed Oils', href: '#', isComingSoon: true },
-                { name: 'Spices & Masalas', href: '#', isComingSoon: true },
+                ...(collections?.map(col => ({
+                    name: col.name,
+                    href: `/collections/${col.slug}`
+                })) || [
+                        { name: 'Pickles', href: '/collections/pickles' },
+                        { name: 'Cold-Pressed Oils', href: '#', isComingSoon: true },
+                        { name: 'Spices & Masalas', href: '#', isComingSoon: true },
+                    ]),
             ],
         },
         {
