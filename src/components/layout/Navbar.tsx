@@ -192,7 +192,7 @@ export default function Navbar() {
                             )}
                         </div>
 
-                        <Link href="/cart" className="group flex items-center text-stone-600 hover:text-amber-700 transition-colors relative p-1">
+                        <Link href="/checkout/cart" className="group flex items-center text-stone-600 hover:text-amber-700 transition-colors relative p-1">
                             <ShoppingBag className="w-5 h-5" />
                             {mounted && cartItemCount > 0 && (
                                 <span className="absolute -top-1.5 -right-1.5 bg-amber-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">

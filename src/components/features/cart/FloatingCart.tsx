@@ -22,7 +22,7 @@ export default function FloatingCart() {
     const subtotal = items.reduce((acc, item) => acc + (item.price * item.quantity), 0)
 
     useEffect(() => {
-        if (itemCount > 0 && pathname !== '/cart' && !pathname.startsWith('/checkout')) {
+        if (itemCount > 0 && pathname !== '/checkout/cart' && !pathname.startsWith('/checkout')) {
             setIsVisible(true)
         } else {
             setIsVisible(false)
@@ -34,7 +34,7 @@ export default function FloatingCart() {
     return (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-lg px-4 animate-in fade-in slide-in-from-bottom-5 duration-500">
             <Link
-                href="/cart"
+                href="/checkout/cart"
                 className="flex items-center justify-between bg-stone-900 border border-stone-800 text-white p-4 rounded-2xl shadow-2xl hover:bg-stone-800 transition-all group active:scale-[0.98]"
             >
                 <div className="flex items-center gap-4">

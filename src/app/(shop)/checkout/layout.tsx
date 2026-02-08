@@ -15,7 +15,7 @@ export default function CheckoutLayout({
 
     useEffect(() => {
         if (!isLoading && !user) {
-            router.push('/cart');
+            router.push('/checkout/cart');
         }
     }, [user, isLoading, router]);
 
