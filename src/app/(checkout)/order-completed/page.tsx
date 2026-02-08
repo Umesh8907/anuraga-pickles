@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useCheckoutStore } from '@/store/useCheckoutStore';
 import { CheckCircle2 } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 
-export default function OrderCompletedPage() {
+function OrderCompletedContent() {
     const { resetCheckout } = useCheckoutStore();
     const searchParams = useSearchParams();
     const orderId = searchParams.get('orderId');
@@ -44,5 +44,13 @@ export default function OrderCompletedPage() {
                 </Link>
             </div>
         </div>
+    )
+}
+
+export default function OrderCompletedPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+            <OrderCompletedContent />
+        </Suspense>
     )
 }
