@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Poppins, Cinzel, Caveat_Brush } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/providers";
 import { Toaster } from "sonner";
@@ -7,11 +7,39 @@ import { Toaster } from "sonner";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
+  adjustFontFallback: true,
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
+  adjustFontFallback: true,
+});
+
+const poppins = Poppins({
+  weight: ['300', '400', '500', '600', '700'],
+  subsets: ["latin"],
+  variable: "--font-poppins",
+  display: "swap",
+  adjustFontFallback: true,
+});
+
+const cinzel = Cinzel({
+  weight: ['400', '500', '600', '700'],
+  subsets: ["latin"],
+  variable: "--font-cinzel",
+  display: "swap",
+  adjustFontFallback: true,
+});
+
+const caveat = Caveat_Brush({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-caveat",
+  display: "swap",
+  adjustFontFallback: true,
 });
 
 export const metadata: Metadata = {
@@ -69,7 +97,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${cinzel.variable} ${caveat.variable} antialiased`}
         suppressHydrationWarning
       >
         <Providers>

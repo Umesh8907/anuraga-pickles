@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
 import Link from 'next/link'
 import { Heart, ShoppingBag } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -9,15 +9,13 @@ import { useAddToCart } from '@/hooks/useCart'
 import { useWishlist, useAddToWishlist, useRemoveFromWishlist } from '@/hooks/useWishlist'
 import { useAuthModalStore } from '@/store/useAuthModalStore'
 import { useUser } from '@/hooks/useAuth'
+import productimg from '@/assets/Productimg.png'
 
 interface ProductCardProps {
     product: Product
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-    const defaultVariant = product.variants?.find(v => v.isDefault) || product.variants?.[0];
-    const [selectedVariant, setSelectedVariant] = useState(defaultVariant)
-
     const { data: user } = useUser();
     const { data: wishlist } = useWishlist();
     const { mutate: addToWishlist } = useAddToWishlist();
@@ -27,21 +25,22 @@ export default function ProductCard({ product }: ProductCardProps) {
 
     const isWishlisted = wishlist?.products.some(p => p._id === product._id) || false;
 
-    const mainImage = product.images?.[0] || 'https://placehold.co/600x400?text=No+Image';
+    const mainImage = product.images?.[0] || productimg;
 
-    const price = selectedVariant?.price || 0;
-    const mrp = selectedVariant?.mrp || price;
+    // Use the first variant or default values if no variants exist
+    const firstVariant = product.variants?.[0];
+    const price = firstVariant?.price || 0;
+    const mrp = firstVariant?.mrp || price;
     const discount = mrp > price
         ? Math.round(((mrp - price) / mrp) * 100)
         : 0;
 
     const handleAddToCart = (e: React.MouseEvent) => {
         e.preventDefault()
-        if (!selectedVariant) return;
 
         addToCart({
             product: product,
-            variantId: selectedVariant._id,
+            variantId: firstVariant?._id || '',
             quantity: 1
         });
     }
@@ -61,97 +60,88 @@ export default function ProductCard({ product }: ProductCardProps) {
     }
 
     return (
-        <div className="group bg-white rounded-xl overflow-hidden border border-stone-100 hover:border-brand-teal shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full relative">
-            <Link href={`/products/${product.slug}`} className="block relative h-64 overflow-hidden">
-                <img
-                    src={mainImage}
-                    alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+        <div className="relative w-full rounded-2xl bg-white shadow-md transition hover:shadow-lg">
+            {/* Best Seller */}
+            {product.collections && product.collections[0] && (
+                <span className="absolute left-3 top-3 z-10 rounded bg-black px-2 py-1 text-[11px] font-semibold text-white">
+                    {typeof product.collections[0] === 'string' ? product.collections[0] : product.collections[0].name}
+                </span>
+            )}
 
-                {/* Collections as tags */}
-                {product.collections && product.collections[0] && (
-                    <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-amber-800 text-[10px] font-bold px-2 py-1 rounded-sm uppercase tracking-wider shadow-sm">
-                        {typeof product.collections[0] === 'string' ? product.collections[0] : product.collections[0].name}
-                    </span>
-                )}
+            {/* Wishlist */}
+            <button 
+                onClick={toggleWishlist}
+                className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white shadow"
+            >
+                <Heart className={cn("w-4 h-4", isWishlisted ? "fill-current text-red-500" : "text-stone-400")} />
+            </button>
 
-                {/* Wishlist Button */}
-                <button
-                    onClick={toggleWishlist}
-                    className="absolute top-3 right-3 p-2 bg-white/80 backdrop-blur-sm rounded-full text-stone-400 hover:text-red-500 hover:bg-white transition-colors shadow-sm"
-                >
-                    <Heart className={cn("w-4 h-4", isWishlisted && "fill-current text-red-500")} />
-                </button>
+            {/* Image */}
+            <Link href={`/products/${product.slug}`}>
+                <div className="relative h-[180px] sm:h-[200px] md:h-[220px] lg:h-[240px] xl:h-[260px] rounded-t-2xl bg-[#FFE2C4]">
+                    <img
+                        src={mainImage}
+                        alt={product.name}
+                        className="w-full h-full object-contain p-5"
+                    />
+                </div>
             </Link>
 
-            <div className="p-5 flex flex-col flex-grow">
-                <Link href={`/products/${product.slug}`}>
-                    <h3 className="text-lg font-bold text-stone-800 mb-1 line-clamp-1 group-hover:text-brand-teal transition-colors">
-                        {product.name}
-                    </h3>
-                </Link>
+            {/* Content */}
+            <div className="px-4 pb-4 pt-3">
+                {/* Feature Tags */}
+                <div className="mb-2 sm:mb-3 flex flex-wrap items-center gap-1 sm:gap-1.5">
+                    <span className="rounded-full bg-[#E5FAD1] px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-medium leading-none text-black">
+                        Preservative-Free
+                    </span>
 
-                {/* Price Section */}
-                <div className="flex items-baseline gap-2 mb-4">
-                    <span className="text-lg font-bold text-stone-900">₹{price}</span>
+                    <span className="rounded-full bg-[#D7FFEC] px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-medium leading-none text-black">
+                        Woman-Made
+                    </span>
+                </div>
+
+                <p className="line-clamp-2 text-xs sm:text-sm font-semibold leading-snug text-black">
+                    {product.name}
+                </p>
+
+                {/* Rating */}
+                <div className="mt-1 sm:mt-1.5 flex items-center gap-1 sm:gap-2 text-xs text-black/60">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3 text-[#F4B400]">
+                        <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
+                    </svg>
+                    <span>{product.averageRating ?? 4.8}</span>
+                    <span className="hidden sm:inline">| Mixed Pickle</span>
+                </div>
+
+                {/* Price */}
+                <div className="mt-1.5 sm:mt-2 flex items-center gap-1.5 sm:gap-2">
+                    {mrp > price && (
+                        <span className="text-xs text-black/40 line-through">
+                            ₹{mrp}
+                        </span>
+                    )}
+                    <span className="text-sm sm:text-base font-bold text-black">
+                        ₹{price}
+                    </span>
                     {discount > 0 && (
-                        <>
-                            <span className="text-sm text-stone-400 line-through">₹{mrp}</span>
-                            <span className="text-xs font-bold text-green-600">({discount}% OFF)</span>
-                        </>
+                        <span className="text-xs font-bold text-green-600">({discount}% OFF)</span>
                     )}
                 </div>
 
-                {/* Variant Selector (Size Chooser) */}
-                {product.variants && product.variants.length > 0 ? (
-                    <div className="mb-4">
-                        <div className="flex flex-wrap gap-2">
-                            {product.variants.map((variant) => (
-                                <button
-                                    key={variant._id}
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        setSelectedVariant(variant);
-                                    }}
-                                    className={cn(
-                                        "px-2.5 py-1 text-xs font-bold rounded-md transition-all border",
-                                        selectedVariant?._id === variant._id
-                                            ? "bg-brand-amber text-white border-brand-amber shadow-sm"
-                                            : "bg-white text-stone-600 border-stone-200 hover:border-brand-teal hover:bg-stone-50"
-                                    )}
-                                >
-                                    {variant.label}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                ) : (
-                    <div className="mb-4 h-6"></div> // Placeholder for spacing
-                )}
+                {/* Add Button */}
+                <button
+                    onClick={handleAddToCart}
+                    disabled={!firstVariant || firstVariant.stock <= 0}
+                    className={cn(
+                        "mt-2 sm:mt-3 h-[36px] sm:h-[40px] w-full rounded-lg text-xs sm:text-sm font-semibold text-white",
+                        (!firstVariant || firstVariant.stock <= 0)
+                            ? "bg-stone-100 text-stone-400 cursor-not-allowed"
+                            : "bg-[#C05A2B] hover:bg-[#a94d24]"
+                    )}
+                >
+                    {!firstVariant || firstVariant.stock <= 0 ? "Out of Stock" : "+ ADD"}
+                </button>
 
-                {/* Add to Cart */}
-                <div className="mt-auto pt-2">
-                    <button
-                        onClick={handleAddToCart}
-                        disabled={!selectedVariant || selectedVariant.stock <= 0}
-                        className={cn(
-                            "w-full flex items-center justify-center gap-2 py-2.5 rounded-lg transition-colors font-medium text-sm",
-                            (!selectedVariant || selectedVariant.stock <= 0)
-                                ? "bg-stone-100 text-stone-400 cursor-not-allowed"
-                                : "bg-brand-teal hover:brightness-110 text-white shadow-lg shadow-brand-teal/10"
-                        )}
-                    >
-                        {(!selectedVariant || selectedVariant.stock <= 0) ? (
-                            "Out of Stock"
-                        ) : (
-                            <>
-                                <ShoppingBag className="w-4 h-4" />
-                                Add to Cart
-                            </>
-                        )}
-                    </button>
-                </div>
             </div>
         </div>
     )
