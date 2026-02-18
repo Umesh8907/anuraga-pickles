@@ -10,6 +10,7 @@ import { useAuthModalStore } from '@/store/useAuthModalStore'
 import { useRouter } from 'next/navigation'
 import PriceDetails from '@/components/checkout/PriceDetails'
 import { useAddress } from '@/hooks/useAddress'
+import CheckoutSteps from '@/components/checkout/CheckoutSteps'
 
 export default function CartPage() {
     const { data: cartData, isLoading } = useCart();
@@ -53,10 +54,16 @@ export default function CartPage() {
 
     return (
         <div className="bg-stone-50 min-h-screen pb-20">
-            <div className="bg-white border-b border-stone-200 py-4">
-                <div className="max-w-5xl mx-auto px-4 sm:px-6 text-sm text-stone-500">
-                    <Link href="/" className="hover:text-stone-900">Home</Link> / <span>Shop</span> / <span className="font-bold text-stone-900">Cart</span>
+            {/* Breadcrumbs */}
+            <div className="bg-white border-b border-stone-100">
+                <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3">
+                    <p className="text-xs text-stone-500">Home / Checkout / Cart</p>
                 </div>
+            </div>
+
+            {/* Checkout Steps */}
+            <div className="bg-white border-b border-stone-200">
+                <CheckoutSteps />
             </div>
 
             <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-8">
@@ -65,18 +72,18 @@ export default function CartPage() {
                     <div className="lg:col-span-8 space-y-4">
                         {/* Deliver To Section */}
                         {user && (
-                            <div className="bg-emerald-50/50 p-4 rounded-sm border border-emerald-100 flex justify-between items-center">
-                                <div className="text-sm">
-                                    <span className="text-stone-600 mr-1">Deliver to:</span>
-                                    <span className="font-bold text-stone-900">{defaultAddress ? defaultAddress.name : 'Select Address'}</span>
-                                    {defaultAddress && <span className="text-stone-900">, {defaultAddress.pincode}</span>}
-                                    <div className="text-xs text-stone-500 mt-0.5. truncate max-w-xs">
-                                        {defaultAddress ? `${defaultAddress.addressLine1}, ${defaultAddress.city}` : 'Login to view addresses'}
-                                    </div>
+                            <div className="bg-white p-6 rounded-sm border border-stone-200 flex justify-between items-start">
+                                <div>
+                                    <h3 className="text-sm font-bold text-stone-900 mb-1">
+                                        Deliver to: <span className="font-bold">{defaultAddress ? defaultAddress.name : 'Select Address'}</span>, <span className="font-bold">{defaultAddress?.pincode}</span>
+                                    </h3>
+                                    <p className="text-sm text-stone-500 max-w-lg">
+                                        {defaultAddress ? `${defaultAddress.addressLine1}, ${defaultAddress.city}, ${defaultAddress.state}` : 'Login to view addresses'}
+                                    </p>
                                 </div>
                                 <button
                                     onClick={() => router.push('/checkout/address')}
-                                    className="text-white text-xs font-bold bg-emerald-700 px-4 py-2 rounded-sm hover:bg-emerald-800 uppercase shadow-sm"
+                                    className="text-white text-xs font-bold bg-[#556B2F] px-4 py-2 rounded-sm hover:opacity-90 uppercase shadow-sm whitespace-nowrap"
                                 >
                                     Change Address
                                 </button>
@@ -107,81 +114,82 @@ export default function CartPage() {
                         {/* Cart Items List */}
                         <div className="space-y-4">
                             {cartItems.map((item) => (
-                                <div key={item._id} className="bg-white p-4 rounded-sm border border-stone-200 relative group">
+                                <div key={item._id} className="bg-white p-6 rounded-sm border border-stone-200 relative">
                                     <button
                                         onClick={() => removeFromCart(item._id)}
-                                        className="absolute top-4 right-4 text-stone-400 hover:text-stone-800"
+                                        className="absolute top-6 right-6 text-stone-400 hover:text-stone-800"
                                     >
                                         <Trash2 className="w-5 h-5" />
                                     </button>
 
-                                    <div className="flex gap-6">
+                                    <div className="flex gap-8">
                                         {/* Image */}
-                                        <div className="shrink-0 w-32 h-32 bg-stone-50 rounded-sm overflow-hidden">
+                                        <div className="shrink-0 w-40 h-40 bg-[#F5F5DC] rounded-sm flex items-center justify-center p-4">
                                             <img
                                                 src={item.product?.images?.[0] || 'https://placehold.co/150x200?text=No+Image'}
                                                 alt={item.product?.name || 'Product'}
-                                                className="w-full h-full object-cover"
+                                                className="w-full h-full object-contain mix-blend-multiply"
                                             />
                                         </div>
 
                                         {/* Content */}
                                         <div className="flex-1 py-1">
-                                            <h3 className="font-bold text-stone-900 text-base mb-1">{item.product?.name}</h3>
-                                            <p className="text-stone-500 text-sm mb-4">{item.variantLabel}</p>
+                                            <h3 className="font-bold text-stone-900 text-lg mb-4">{item.product?.name}</h3>
 
-                                            <div className="flex flex-wrap gap-6 mb-4">
-                                                {/* Quantity Selector */}
-                                                <div className="flex items-center gap-3">
-                                                    <span className="text-xs font-bold text-stone-500 bg-stone-100 px-2 py-1 rounded">Qty</span>
-                                                    <div className="flex items-center border border-stone-300 rounded-sm">
+                                            <div className="grid grid-cols-2 gap-y-4 gap-x-8 max-w-md">
+                                                {/* Quantity */}
+                                                <div>
+                                                    <div className="text-sm text-stone-500 mb-2">Quantity</div>
+                                                    <div className="flex items-center border border-stone-200 rounded-sm w-fit">
                                                         <button
                                                             disabled={item.quantity <= 1}
                                                             onClick={() => updateCartItem({ itemId: item._id, quantity: item.quantity - 1 })}
-                                                            className="px-2 py-1 hover:bg-stone-50 disabled:opacity-50"
+                                                            className="px-3 py-1 hover:bg-stone-50 disabled:opacity-50 text-stone-500"
                                                         >
                                                             <Minus className="w-3 h-3" />
                                                         </button>
-                                                        <span className="px-2 text-sm font-bold w-6 text-center">{item.quantity}</span>
+                                                        <span className="px-3 text-sm font-bold w-8 text-center">{item.quantity}</span>
                                                         <button
                                                             onClick={() => updateCartItem({ itemId: item._id, quantity: item.quantity + 1 })}
-                                                            className="px-2 py-1 hover:bg-stone-50"
+                                                            className="px-3 py-1 hover:bg-stone-50 text-stone-500"
                                                         >
                                                             <Plus className="w-3 h-3" />
                                                         </button>
                                                     </div>
                                                 </div>
 
-                                                {/* Size Selector */}
-                                                <div className="flex items-center gap-3">
-                                                    <span className="text-xs font-bold text-stone-500 bg-stone-100 px-2 py-1 rounded">Size</span>
-                                                    <div className="relative">
-                                                        <select
-                                                            value={item.variantId}
-                                                            onChange={(e) => updateCartItemVariant({ itemId: item._id, newVariantId: e.target.value })}
-                                                            className="appearance-none pl-3 pr-8 py-1 rounded-full border border-stone-200 bg-white text-xs font-medium text-stone-700 hover:border-emerald-500 focus:outline-none focus:border-emerald-500 transition-colors cursor-pointer"
-                                                        >
-                                                            {item.product?.variants?.map((variant) => (
-                                                                <option
-                                                                    key={variant._id}
-                                                                    value={variant._id}
-                                                                    disabled={variant.stock <= 0 && variant._id !== item.variantId}
-                                                                >
-                                                                    {variant.label} {variant.stock <= 0 && '(Out of Stock)'}
-                                                                </option>
-                                                            ))}
-                                                        </select>
-                                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-stone-500">
-                                                            <ChevronDown className="h-3 w-3" />
-                                                        </div>
+                                                {/* Choose Size */}
+                                                <div>
+                                                    <div className="text-sm text-stone-500 mb-2">Choose Size</div>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {item.product?.variants?.map((variant) => (
+                                                            <button
+                                                                key={variant._id}
+                                                                onClick={() => {
+                                                                    if (variant._id !== item.variantId) {
+                                                                        updateCartItemVariant({ itemId: item._id, newVariantId: variant._id });
+                                                                    }
+                                                                }}
+                                                                disabled={variant.stock <= 0}
+                                                                className={cn(
+                                                                    "px-3 py-1 rounded-full border text-xs font-medium transition-colors",
+                                                                    item.variantId === variant._id
+                                                                        ? "border-[#9ACD32] bg-[#9ACD32] text-white"
+                                                                        : "border-stone-200 text-stone-600 hover:border-stone-300",
+                                                                    variant.stock <= 0 && "opacity-50 cursor-not-allowed bg-stone-50"
+                                                                )}
+                                                            >
+                                                                {variant.label}
+                                                            </button>
+                                                        ))}
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            <div className="flex items-center gap-3">
-                                                <span className="font-bold text-stone-900 text-lg">₹{item.price.toLocaleString()}</span>
-                                                <span className="text-stone-400 line-through text-sm">₹{Math.round(item.price * 1.3).toLocaleString()}</span>
-                                                <span className="text-rose-500 text-xs font-bold">(Inclusive of all taxes)</span>
+                                            <div className="mt-4 pt-4 border-t border-stone-100 flex items-center gap-2">
+                                                <span className="font-bold text-stone-900 text-xl">₹{item.price.toFixed(2)}</span>
+                                                <span className="text-stone-400 text-sm">(Inclusive of all taxes)</span>
+                                                <span className="text-stone-300 line-through text-sm ml-2">M.R.P - ₹{Math.round(item.price * 1.3).toFixed(2)}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -194,16 +202,25 @@ export default function CartPage() {
                     <div className="lg:col-span-4 mt-8 lg:mt-0 space-y-6">
 
                         {/* Coupons */}
-                        <div className="bg-white p-5 rounded-sm border border-stone-200">
-                            <div className="text-xs font-bold text-stone-500 uppercase tracking-wider mb-4">COUPONS</div>
-                            <div className="flex justify-between items-center">
-                                <div className="flex items-center gap-3">
-                                    <Tag className="w-4 h-4 text-stone-900" />
-                                    <span className="font-bold text-stone-900 text-sm">Apply Coupons</span>
+                        <div className="bg-white p-5 rounded-sm border border-stone-200 shadow-sm relative overflow-hidden group hover:border-[#A0522D]/30 transition-all">
+                            <div className="absolute top-0 right-0 w-16 h-16 bg-[#A0522D]/5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+
+                            <div className="relative">
+                                <div className="text-xs font-bold text-stone-500 uppercase tracking-wider mb-4">Offers & Coupons</div>
+                                <div className="flex justify-between items-center">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-[#A0522D]/10 flex items-center justify-center text-[#A0522D]">
+                                            <Tag className="w-4 h-4" />
+                                        </div>
+                                        <div>
+                                            <span className="font-bold text-stone-900 text-sm block">Apply Coupons</span>
+                                            <span className="text-[10px] text-stone-500 font-medium">Get extra discounts on your order</span>
+                                        </div>
+                                    </div>
+                                    <button className="text-[#A0522D] text-xs font-bold border border-[#A0522D]/30 px-5 py-2 rounded-sm hover:bg-[#A0522D] hover:text-white transition-all uppercase tracking-wide">
+                                        APPLY
+                                    </button>
                                 </div>
-                                <button className="text-emerald-600 text-xs font-bold border border-emerald-600 px-4 py-1.5 rounded-sm hover:bg-emerald-50 uppercase">
-                                    APPLY
-                                </button>
                             </div>
                         </div>
 

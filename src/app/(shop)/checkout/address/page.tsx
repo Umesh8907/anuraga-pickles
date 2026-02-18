@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import AddressForm from '@/components/checkout/AddressForm';
 import { useCart } from '@/hooks/useCart';
 import PriceDetails from '@/components/checkout/PriceDetails';
+import CheckoutSteps from '@/components/checkout/CheckoutSteps';
 
 export default function AddressPage() {
     const router = useRouter();
@@ -65,10 +66,16 @@ export default function AddressPage() {
 
     return (
         <div className="bg-stone-50 min-h-screen pb-20">
-            <div className="bg-white border-b border-stone-200 py-4">
-                <div className="max-w-5xl mx-auto px-4 sm:px-6 text-sm text-stone-500">
-                    <Link href="/" className="hover:text-stone-900">Home</Link> / <span>Shop</span> / <span className="font-bold text-stone-900">Cart</span>
+            {/* Breadcrumbs */}
+            <div className="bg-white border-b border-stone-100">
+                <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3">
+                    <p className="text-xs text-stone-500">Home / Checkout / Address</p>
                 </div>
+            </div>
+
+            {/* Checkout Steps */}
+            <div className="bg-white border-b border-stone-200">
+                <CheckoutSteps />
             </div>
 
             <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-8">
@@ -185,7 +192,7 @@ export default function AddressPage() {
                     <div className="lg:col-span-4 space-y-6">
 
                         {/* Delivery Estimates (Styled better) */}
-                        <div className="bg-white p-5 rounded-sm border border-stone-200">
+                        <div className="bg-white p-5 rounded-sm border border-stone-200 shadow-sm">
                             <h3 className="text-xs font-bold text-stone-500 uppercase tracking-wider mb-4">DELIVERY ESTIMATES</h3>
                             <ul className="space-y-4">
                                 {cart?.items.map(item => (

@@ -12,6 +12,7 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import api from '@/lib/axios';
 import { useQueryClient } from '@tanstack/react-query';
+import CheckoutSteps from '@/components/checkout/CheckoutSteps';
 
 // Razorpay Type Definition (Basic)
 declare global {
@@ -183,10 +184,16 @@ export default function PaymentPage() {
 
     return (
         <div className="bg-stone-50 min-h-screen pb-20">
-            <div className="bg-white border-b border-stone-200 py-4">
-                <div className="max-w-5xl mx-auto px-4 sm:px-6 text-sm text-stone-500">
-                    <Link href="/" className="hover:text-stone-900">Home</Link> / <span>Shop</span> / <span className="font-bold text-stone-900">Cart</span>
+            {/* Breadcrumbs */}
+            <div className="bg-white border-b border-stone-100">
+                <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3">
+                    <p className="text-xs text-stone-500">Home / Checkout / Payment</p>
                 </div>
+            </div>
+
+            {/* Checkout Steps */}
+            <div className="bg-white border-b border-stone-200">
+                <CheckoutSteps />
             </div>
 
             <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-8">
@@ -194,10 +201,10 @@ export default function PaymentPage() {
                     <div className="lg:col-span-8 space-y-6">
 
                         {/* Available Offers */}
-                        <div className="bg-white p-5 rounded-sm border border-stone-200">
-                            <div className="flex items-center gap-2 mb-3">
-                                <Tag className="w-4 h-4 text-stone-900" />
-                                <span className="font-bold text-stone-900 text-sm">Available Offers</span>
+                        <div className="bg-white p-5 rounded-sm border border-stone-200 shadow-sm">
+                            <div className="flex items-center gap-2 mb-4">
+                                <Tag className="w-4 h-4 text-stone-500" />
+                                <span className="text-xs font-bold text-stone-500 uppercase tracking-wider">Available Offers</span>
                             </div>
                             <ul className="space-y-3 text-sm text-stone-600 pl-1">
                                 <li className="flex items-start gap-3">

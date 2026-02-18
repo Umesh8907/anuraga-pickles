@@ -3,6 +3,7 @@
 import React from 'react';
 import { useCart } from '@/hooks/useCart';
 import { cn } from '@/lib/utils';
+import { Tag } from 'lucide-react';
 
 interface PriceDetailsProps {
     className?: string;
@@ -23,43 +24,48 @@ export default function PriceDetails({ className, button }: PriceDetailsProps) {
 
     return (
         <div className={cn("space-y-6", className)}>
-            <div className="bg-white">
-                <h3 className="text-base font-bold text-stone-900 mb-6">Order Summary</h3>
+            <div className="bg-white p-5 rounded-sm border border-stone-200 shadow-sm">
+                <h3 className="text-xs font-bold text-stone-500 uppercase tracking-wider mb-4">Price Details</h3>
 
-                <div className="space-y-4 mb-6">
-                    <div className="flex justify-between items-center text-sm font-medium">
+                <div className="space-y-3 mb-4">
+                    <div className="flex justify-between items-center text-sm">
                         <span className="text-stone-600">Total MRP</span>
-                        <span className="text-stone-900">₹{totalMRP}</span>
+                        <span className="text-stone-900 font-medium">₹{totalMRP}</span>
                     </div>
 
-                    <div className="flex justify-between items-center text-sm font-medium">
+                    <div className="flex justify-between items-center text-sm">
                         <span className="text-stone-600">Discount on MRP</span>
-                        <span className="text-emerald-500">-₹{discount}</span>
+                        <span className="text-emerald-600 font-medium">-₹{discount}</span>
                     </div>
 
-                    <div className="flex justify-between items-center text-sm font-medium">
+                    <div className="flex justify-between items-center text-sm">
                         <span className="text-stone-600">Coupon Discount</span>
-                        <button className="text-rose-500 hover:text-rose-600 text-sm font-medium">Apply Coupon</button>
+                        <span className="text-stone-900 font-medium">
+                            <span className="text-stone-400 text-xs mr-1">No Coupon Applied</span>
+                        </span>
                     </div>
 
-                    <div className="flex justify-between items-center text-sm font-medium">
+                    <div className="flex justify-between items-center text-sm">
                         <span className="text-stone-600">Delivery Charge</span>
-                        <span className="text-stone-900">
-                            {shipping === 0 ? <span className="text-emerald-500">Free</span> : `₹${shipping}`}
+                        <span className="text-stone-900 font-medium">
+                            {shipping === 0 ? <span className="text-emerald-600">Free</span> : `₹${shipping}`}
                         </span>
                     </div>
                 </div>
 
-                <div className="border-t border-stone-200 pt-4 mb-4">
+                <div className="border-t border-dashed border-stone-200 pt-4 mb-4">
                     <div className="flex justify-between items-center">
                         <span className="text-base font-bold text-stone-900">Total Amount</span>
-                        <span className="text-base font-bold text-stone-900">₹{total}</span>
+                        <span className="text-lg font-bold text-stone-900">₹{total}</span>
                     </div>
                 </div>
 
-                <div className="bg-emerald-50 p-3 rounded-sm border border-emerald-100 mb-6 text-center">
-                    <p className="text-emerald-700 font-bold text-xs">You will save ₹{discount} on this order</p>
-                </div>
+                {discount > 0 && (
+                    <div className="bg-emerald-50 px-3 py-2 rounded-sm border border-emerald-100 mb-6 flex items-center gap-2 justify-center">
+                        <Tag className="w-3.5 h-3.5 text-emerald-600" />
+                        <p className="text-emerald-700 font-bold text-xs">You are saving ₹{discount} on this order</p>
+                    </div>
+                )}
 
                 {button && (
                     <div className="mb-6">
@@ -67,14 +73,13 @@ export default function PriceDetails({ className, button }: PriceDetailsProps) {
                     </div>
                 )}
 
-                <div>
-                    <p className="text-[10px] font-bold text-stone-900 uppercase tracking-wider mb-2">ACCEPTED PAYMENT METHODS</p>
-                    <div className="flex gap-2">
-                        <img src="https://placehold.co/40x25?text=VISA" alt="Visa" className="h-6 w-auto" />
-                        <img src="https://placehold.co/40x25?text=MC" alt="Mastercard" className="h-6 w-auto" />
-                        <img src="https://placehold.co/40x25?text=RuPay" alt="RuPay" className="h-6 w-auto" />
-                        <img src="https://placehold.co/40x25?text=UPI" alt="UPI" className="h-6 w-auto" />
-                        <img src="https://placehold.co/40x25?text=Bank" alt="Bank" className="h-6 w-auto" />
+                <div className="pt-2 border-t border-stone-100">
+                    <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-3 text-center">We Accept</p>
+                    <div className="flex gap-2 justify-center opacity-80 grayscale hover:grayscale-0 transition-all duration-300">
+                        <img src="https://placehold.co/40x25?text=VISA" alt="Visa" className="h-5 w-auto" />
+                        <img src="https://placehold.co/40x25?text=MC" alt="Mastercard" className="h-5 w-auto" />
+                        <img src="https://placehold.co/40x25?text=RuPay" alt="RuPay" className="h-5 w-auto" />
+                        <img src="https://placehold.co/40x25?text=UPI" alt="UPI" className="h-5 w-auto" />
                     </div>
                 </div>
             </div>
