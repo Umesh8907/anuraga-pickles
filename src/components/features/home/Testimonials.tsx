@@ -27,7 +27,7 @@ const TESTIMONIALS = [
 export default function Testimonials() {
     return (
         <section className="py-24 bg-white">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-16">
                     <h2 className="text-3xl md:text-4xl font-bold text-amber-900 mb-4">Loved by 10,000+ Customers</h2>
                     <p className="text-lg text-stone-600 max-w-2xl mx-auto">
@@ -43,7 +43,7 @@ export default function Testimonials() {
                                     <Star key={i} className="w-5 h-5 fill-current" />
                                 ))}
                             </div>
-                            <p className="text-stone-700 italic mb-6 flex-grow">"{t.comment}"</p>
+                            <p className="text-stone-700 italic mb-6 grow">"{t.comment}"</p>
                             <div>
                                 <h4 className="font-bold text-stone-900">{t.name}</h4>
                                 <span className="text-sm text-stone-500">{t.role}</span>

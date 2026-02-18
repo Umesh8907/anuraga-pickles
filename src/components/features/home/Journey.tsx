@@ -26,7 +26,7 @@ const STEPS = [
 export default function Journey() {
     return (
         <section className="py-24 bg-amber-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-16">
                     <span className="text-amber-600 font-semibold tracking-wider uppercase text-sm">Our Process</span>
                     <h2 className="text-3xl md:text-4xl font-bold text-amber-900 mt-2 mb-4">From Our Kitchen to Your Table</h2>

@@ -5,9 +5,9 @@ export default function Hero() {
         <section className="relative bg-amber-900 text-white py-32 overflow-hidden">
             {/* Background Pattern/Image Overlay */}
             <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1597362925123-77861d3fbac7?q=80&w=2670&auto=format&fit=crop')] bg-cover bg-center opacity-20 mix-blend-overlay"></div>
-            <div className="absolute inset-0 bg-gradient-to-r from-amber-950/90 to-amber-900/40"></div>
+            <div className="absolute inset-0 bg-linear-to-r from-amber-950/90 to-amber-900/40"></div>
 
-            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-start justify-center h-full">
+            <div className="relative max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-start justify-center h-full">
                 <span className="text-amber-400 font-bold tracking-wider uppercase mb-4 text-sm md:text-base">Grandma's Secret Recipe</span>
                 <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 leading-tight">
                     Authentic South Indian <br />
