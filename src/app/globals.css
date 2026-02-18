@@ -12,6 +12,8 @@
   --font-mono: var(--font-geist-mono);
   --font-poppins: var(--font-poppins);
   --font-cinzel: var(--font-cinzel);
+  --font-caveat: var(--font-caveat);
+  --font-mukta: var(--font-mukta);
   --color-brand-teal: #005C4B;
   --color-brand-amber: #D97706;
 }

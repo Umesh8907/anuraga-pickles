@@ -2,6 +2,9 @@ import { Metadata, ResolvingMetadata } from 'next'
 import ProductClient from './ProductClient'
 import productService from '@/services/product.service'
 import { Product } from '@/types'
+import FAQSection from '@/components/features/product/FAQ'
+import CustomerReviews from '@/components/features/product/CustomerReviews'
+
 
 type Props = {
     params: Promise<{ slug: string }>
@@ -78,6 +81,8 @@ export default async function ProductPage({ params }: Props) {
                 />
             )}
             <ProductClient initialData={product} />
+            <CustomerReviews />
+            <FAQSection />
         </>
     )
 }

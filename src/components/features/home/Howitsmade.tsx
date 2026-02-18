@@ -55,7 +55,7 @@ const steps: Step[] = [
 
 export default function HowItsMade() {
   return (
-    <section className="w-full bg-white px-4 py-14 sm:px-6 lg:px-10">
+    <section id="howitsmade" className="w-full bg-white px-4 py-14 sm:px-6 lg:px-10">
       <div className="mx-auto max-w-6xl">
         {/* Heading */}
         <div className="text-center">
@@ -143,13 +143,12 @@ function ImageBox({
 }) {
   return (
     <div
-      className={`relative h-[160px] w-full max-w-[360px] overflow-hidden rounded-xl shadow-md sm:h-[180px] ${
-        align === "left"
+      className={`relative h-[160px] w-full max-w-[360px] overflow-hidden rounded-xl shadow-md sm:h-[180px] ${align === "left"
           ? "ml-auto"
           : align === "right"
-          ? "mr-auto"
-          : ""
-      }`}
+            ? "mr-auto"
+            : ""
+        }`}
     >
       <Image src={img} alt={alt} fill className="object-cover" />
     </div>
@@ -169,13 +168,12 @@ function TextBox({
 }) {
   return (
     <div
-      className={`max-w-[360px] min-h-[140px] flex flex-col justify-center ${
-        align === "right"
+      className={`max-w-[360px] min-h-[140px] flex flex-col justify-center ${align === "right"
           ? "ml-auto text-right"
           : align === "left"
-          ? "mr-auto text-left"
-          : "text-left"
-      }`}
+            ? "mr-auto text-left"
+            : "text-left"
+        }`}
     >
       <h3 className="text-[20px] font-semibold text-black">
         {title}

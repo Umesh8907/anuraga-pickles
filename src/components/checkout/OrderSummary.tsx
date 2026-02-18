@@ -3,7 +3,6 @@
 import React from 'react';
 import { useCart } from '@/hooks/useCart';
 import { Address } from '@/types';
-import { cn } from '@/lib/utils';
 
 interface OrderSummaryProps {
     address?: Address;
@@ -12,46 +11,79 @@ interface OrderSummaryProps {
 export default function OrderSummary({ address }: OrderSummaryProps) {
     const { data: cart } = useCart();
 
-    const subtotal = cart?.items.reduce((sum, item) => sum + (item.price * item.quantity), 0) || 0;
-    // Assuming MRP calculation if available, else using price for now
-    const totalMRP = subtotal; // If we had MRP in cart items we'd use that
-    const discount = 0; // If any
-    const shipping = 40; // Fixed for now as per design mockup
+    const subtotal =
+        cart?.items.reduce((sum, item) => sum + item.price * item.quantity, 0) || 0;
+
+    const totalMRP = subtotal;
+    const discount = 0;
+    const shipping = 40;
     const total = subtotal + shipping - discount;
 
     return (
-        <div className="bg-white p-6 rounded-2xl border border-stone-100 shadow-sm space-y-6">
-            <div>
-                <h3 className="font-black text-stone-900 mb-4">Order Summary</h3>
-                <div className="space-y-3">
-                    <div className="flex justify-between text-sm text-stone-600 font-medium">
-                        <span>Total MRP</span>
-                        <span>₹{totalMRP}</span>
-                    </div>
-                    <div className="flex justify-between text-sm text-emerald-600 font-medium">
-                        <span>Discount on MRP</span>
-                        <span>-₹{discount}</span>
-                    </div>
-                    <div className="flex justify-between text-sm text-stone-600 font-medium">
-                        <span>Delivery Charge</span>
-                        <span>₹{shipping}</span>
-                    </div>
-                    <div className="pt-3 border-t border-dashed border-stone-200 flex justify-between text-base font-black text-stone-900">
-                        <span>Total Amount</span>
-                        <span>₹{total}</span>
-                    </div>
+        <div className="rounded-2xl border bg-white p-5 shadow-sm">
+
+            <h3 className="text-base font-semibold text-zinc-900">
+                Order Summary
+            </h3>
+
+            <div className="mt-4 space-y-3 text-sm">
+
+                <div className="flex items-center justify-between">
+                    <span className="text-zinc-600">Total MRP</span>
+                    <span className="font-medium">₹{totalMRP}</span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                    <span className="text-zinc-600">Discount on MRP</span>
+                    <span className="font-medium text-green-700">
+                        -₹{discount}
+                    </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                    <span className="text-zinc-600">Delivery Charge</span>
+                    <span className="font-medium">₹{shipping}</span>
+                </div>
+
+                <div className="my-3 h-px w-full bg-zinc-200" />
+
+                <div className="flex items-center justify-between text-base font-semibold text-zinc-900">
+                    <span>Total Amount</span>
+                    <span>₹{total}</span>
                 </div>
             </div>
 
+            <p className="mt-4 text-xs text-zinc-500">
+                By placing the order, you agree to our{" "}
+                <span className="font-medium text-green-700 cursor-pointer">
+                    Terms of Use
+                </span>{" "}
+                and{" "}
+                <span className="font-medium text-green-700 cursor-pointer">
+                    Privacy Policy
+                </span>.
+            </p>
+
             {address && (
-                <div className="pt-4 border-t border-stone-100">
-                    <h4 className="font-bold text-xs text-stone-400 uppercase tracking-widest mb-2">Deliver To:</h4>
-                    <p className="font-bold text-stone-900 text-sm">{address.name}</p>
-                    <p className="text-stone-500 text-xs leading-relaxed mt-1">
+                <div className="mt-6 border-t pt-4">
+                    <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-2">
+                        Deliver To
+                    </h4>
+                    <p className="font-medium text-zinc-900 text-sm">
+                        {address.name}
+                    </p>
+                    <p className="text-zinc-600 text-xs mt-1 leading-relaxed">
                         {address.addressLine1}, {address.city}, {address.pincode}
                     </p>
                 </div>
             )}
+
+            {/* <button
+                type="button"
+                className="mt-5 w-full rounded-xl bg-[#B85B2B] py-3 text-sm font-semibold text-white hover:opacity-95 transition"
+            >
+                PLACE ORDER
+            </button> */}
         </div>
     );
 }

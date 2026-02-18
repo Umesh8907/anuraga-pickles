@@ -32,9 +32,9 @@ export default function FAQ() {
   return (
     <section className="bg-white py-20">
       <div className="mx-auto max-w-5xl px-4">
-        
+
         {/* Heading */}
-        <h2 className="mb-10 text-center text-3xl font-semibold text-black">
+        <h2 className="mb-10 text-center text-3xl font-semibold uppercase  text-black">
           Frequently Asked Questions
         </h2>
 
@@ -57,9 +57,8 @@ export default function FAQ() {
                   </span>
 
                   <ChevronDown
-                    className={`h-5 w-5 text-[#1F5C2E] transition-transform duration-300 ${
-                      isOpen ? "rotate-180" : ""
-                    }`}
+                    className={`h-5 w-5 text-[#1F5C2E] transition-transform duration-300 ${isOpen ? "rotate-180" : ""
+                      }`}
                   />
                 </button>
 

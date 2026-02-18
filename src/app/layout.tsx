@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Poppins, Cinzel, Caveat_Brush } from "next/font/google";
+import { Geist, Geist_Mono, Poppins, Cinzel, Caveat_Brush, Mukta } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/providers";
 import { Toaster } from "sonner";
@@ -40,6 +40,13 @@ const caveat = Caveat_Brush({
   variable: "--font-caveat",
   display: "swap",
   adjustFontFallback: true,
+});
+
+const mukta = Mukta({
+  weight: '400',
+  subsets: ["latin"],
+  variable: "--font-mukta",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -97,7 +104,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${cinzel.variable} ${caveat.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${cinzel.variable} ${caveat.variable} ${mukta.variable} antialiased`}
         suppressHydrationWarning
       >
         <Providers>

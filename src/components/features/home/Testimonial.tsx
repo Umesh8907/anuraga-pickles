@@ -1,6 +1,7 @@
 "use client";
 
 import Image, { StaticImageData } from "next/image";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 
 // ✅ Import your images from src/assets
@@ -139,9 +140,9 @@ export default function Testimonials() {
 
                 {/* Button */}
                 <div className="mt-10 flex justify-center">
-                    <button className="rounded-lg bg-[#b54a1c] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:scale-[1.02]">
-                        Shop Ginger Pickle (₹399)
-                    </button>
+                    <Link href="/collections/garlic-pickles" className="rounded-lg bg-[#b54a1c] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:scale-[1.02]">
+                        Shop Garlic Pickles
+                    </Link>
                 </div>
             </div>
         </section>

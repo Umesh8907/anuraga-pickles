@@ -20,12 +20,12 @@ export default function CheckoutLayout({
     }, [user, isLoading, router]);
 
     if (isLoading) {
-        return <div className="min-h-screen bg-stone-50 pt-[120px] pb-20 flex items-center justify-center">Loading...</div>;
+        return <div className="min-h-screen bg-[#fbf6ee] pt-[140px] sm:pt-[140px] md:pt-[150px] lg:pt-[160px] pb-20 flex items-center justify-center">Loading...</div>;
     }
 
     return (
-        <div className="min-h-screen bg-stone-50 pt-[120px] pb-20">
-            <div className="container mx-auto px-4 max-w-6xl">
+        <div className="min-h-screen bg-[#fbf6ee] pt-[120px] sm:pt-[120px] md:pt-[130px] lg:pt-[140px] pb-20 font-poppins">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-10">
                 <CheckoutSteps />
                 {children}
             </div>

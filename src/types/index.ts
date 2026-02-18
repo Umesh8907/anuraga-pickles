@@ -8,6 +8,7 @@ export interface Address {
     state: string;
     pincode: string;
     isDefault: boolean;
+    addressType: 'HOME' | 'WORK';
 }
 
 export interface User {

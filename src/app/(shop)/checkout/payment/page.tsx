@@ -13,6 +13,15 @@ import { toast } from 'sonner';
 import api from '@/lib/axios';
 import { useQueryClient } from '@tanstack/react-query';
 
+import Image from 'next/image';
+
+import visa from "@/assets/visa.png";
+import mastercard from "@/assets/mastercard.png";
+import rupay from "@/assets/rupay.png";
+import upi from "@/assets/upi.png";
+import netbanking from "@/assets/netbanking.png";
+import codIcon from "@/assets/Vector.png";
+
 // Razorpay Type Definition (Basic)
 declare global {
     interface Window {
@@ -30,18 +39,10 @@ const loadRazorpay = () => {
     });
 };
 
-const PAYMENT_MODES = [
-    { id: 'RECOMMENDED', label: 'Recommended', icon: ShieldCheck },
-    { id: 'COD', label: 'Cash On Delivery (Cash/UPI)', icon: Truck },
-    { id: 'UPI', label: 'UPI (Pay via any App)', icon: Wallet },
-    { id: 'CARD', label: 'Credit/Debit Card', icon: CreditCard },
-    { id: 'NETBANKING', label: 'Net Banking', icon: Landmark },
-];
-
 export default function PaymentPage() {
     const router = useRouter();
     const queryClient = useQueryClient();
-    const { selectedAddressId, isAddressConfirmed, paymentMethod, setPaymentMethod } = useCheckoutStore();
+    const { selectedAddressId, isAddressConfirmed, setPaymentMethod } = useCheckoutStore();
     const { data: cart, isLoading: isCartLoading } = useCart();
     const { addresses } = useAddress();
     const [isPlacingOrder, setIsPlacingOrder] = useState(false);
@@ -50,14 +51,12 @@ export default function PaymentPage() {
     const [activeTab, setActiveTab] = useState('RECOMMENDED');
 
     // Use a ref to track if order was successfully placed to prevent the "Empty Cart" redirect
-    // from triggering while we are redirecting to the success page.
     const isOrderSuccess = useRef(false);
 
     // Redirect if checks fail
     useEffect(() => {
         if (isCartLoading || isOrderSuccess.current) return;
 
-        // If cart is empty and we haven't just placed an order, redirect.
         if (!cart || cart.items.length === 0) {
             router.push('/checkout/cart');
         } else if (!selectedAddressId || !isAddressConfirmed) {
@@ -68,7 +67,7 @@ export default function PaymentPage() {
     if (isCartLoading) {
         return (
             <div className="flex justify-center items-center min-h-[400px]">
-                <Loader2 className="w-8 h-8 animate-spin text-rose-500" />
+                <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
             </div>
         );
     }
@@ -78,13 +77,10 @@ export default function PaymentPage() {
     const handlePlaceOrder = async () => {
         if (!selectedAddress) return;
 
-        // Map tab to backend payment method enum
-        // For now, simpler mapping: COD is COD, everything else is ONLINE
         const backendPaymentMethod = activeTab === 'COD' ? 'COD' : 'ONLINE';
 
         setIsPlacingOrder(true);
         try {
-            // 1. Create Order on Backend
             const orderRes = await api.post('/orders', {
                 items: cart?.items,
                 shippingAddress: selectedAddress,
@@ -98,7 +94,6 @@ export default function PaymentPage() {
                     throw new Error('Razorpay SDK failed to load');
                 }
 
-                // 2. Create Razorpay Order
                 const rzOrderRes = await api.post('/payments/razorpay/create-order', {
                     orderId: order._id
                 });
@@ -113,7 +108,6 @@ export default function PaymentPage() {
                     order_id: razorpayOrderId,
                     handler: async function (response: any) {
                         try {
-                            // 3. Verify Payment
                             const verifyRes = await api.post('/payments/razorpay/verify', {
                                 razorpay_order_id: response.razorpay_order_id,
                                 razorpay_payment_id: response.razorpay_payment_id,
@@ -127,8 +121,6 @@ export default function PaymentPage() {
                         } catch (err) {
                             console.error("Payment verification failed", err);
                             toast.error("Payment verification failed. Cancelling order...");
-
-                            // Cancel Order and release stock
                             await api.post(`/orders/${order._id}/cancel`, { reason: "Payment Verification Failed" });
                             setIsPlacingOrder(false);
                         }
@@ -136,16 +128,14 @@ export default function PaymentPage() {
                     prefill: {
                         name: selectedAddress.name,
                         contact: selectedAddress.phone,
-                        // email: user?.email // Optional if we have it
                     },
                     theme: {
-                        color: "#ef4444" // rose-500
+                        color: "#346800"
                     },
                     modal: {
                         ondismiss: async function () {
                             setIsPlacingOrder(false);
-                            toast.info("Payment cancelled. Stock released.");
-                            // Cancel Order and release stock
+                            toast.info("Payment cancelled.");
                             try {
                                 await api.post(`/orders/${order._id}/cancel`, { reason: "Payment Cancelled by User" });
                             } catch (e) {
@@ -159,7 +149,6 @@ export default function PaymentPage() {
                 rzp1.open();
 
             } else {
-                // COD
                 handleOrderSuccess(order._id);
             }
 
@@ -171,127 +160,142 @@ export default function PaymentPage() {
     };
 
     const handleOrderSuccess = async (orderId: string) => {
-        isOrderSuccess.current = true; // Prevent redirect effect
+        isOrderSuccess.current = true;
         toast.success('Order placed successfully!');
-
-        // Invalidate cart so it refetches (and shows empty)
         await queryClient.invalidateQueries({ queryKey: ['cart'] });
-
-        // Navigate to completion page
         router.push(`/order-completed?orderId=${orderId}`);
     };
 
     return (
-        <div className="bg-stone-50 min-h-screen pb-20">
-            <div className="bg-white border-b border-stone-200 py-4">
-                <div className="max-w-5xl mx-auto px-4 sm:px-6 text-sm text-stone-500">
-                    <Link href="/" className="hover:text-stone-900">Home</Link> / <span>Shop</span> / <span className="font-bold text-stone-900">Cart</span>
-                </div>
-            </div>
+        <div className="grid gap-8 lg:grid-cols-3 lg:gap-12">
+            <div className="lg:col-span-2 space-y-8">
 
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-8">
-                <div className="lg:grid lg:grid-cols-12 lg:gap-8 items-start">
-                    <div className="lg:col-span-8 space-y-6">
+                <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+                    <h3 className="text-base font-semibold text-zinc-900 mb-6 flex items-center gap-2 border-b border-zinc-100 pb-4">
 
-                        {/* Available Offers */}
-                        <div className="bg-white p-5 rounded-sm border border-stone-200">
-                            <div className="flex items-center gap-2 mb-3">
-                                <Tag className="w-4 h-4 text-stone-900" />
-                                <span className="font-bold text-stone-900 text-sm">Available Offers</span>
+                        Choose Payment Mode
+                    </h3>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* ONLINE PAYMENT CARD */}
+                        <div
+                            onClick={() => setActiveTab('RECOMMENDED')}
+                            className={cn(
+                                "cursor-pointer rounded-xl border-2 p-6 transition-all",
+                                activeTab !== 'COD'
+                                    ? "border-yellow-500 bg-yellow-50"
+                                    : "border-gray-200"
+                            )}
+                        >
+                            {/* Logos */}
+                            <div className="flex items-center justify-center gap-3 mb-4">
+                                <Image src={visa} alt="Visa" width={45} height={30} className="object-contain" />
+                                <Image src={mastercard} alt="Mastercard" width={45} height={30} className="object-contain" />
+                                <Image src={rupay} alt="Rupay" width={45} height={30} className="object-contain" />
+                                <Image src={netbanking} alt="Netbanking" width={40} height={25} className="object-contain" />
+                                <Image src={upi} alt="UPI" width={45} height={30} className="object-contain" />
                             </div>
-                            <ul className="space-y-3 text-sm text-stone-600 pl-1">
-                                <li className="flex items-start gap-3">
-                                    <span className="mt-2 w-1.5 h-1.5 bg-stone-300 rounded-full flex-shrink-0" />
-                                    <span className="leading-relaxed">10% Instant Discount on Canara Bank Credit Card on min spend of ₹3,500</span>
-                                </li>
-                            </ul>
-                            <button className="text-emerald-600 text-xs font-bold mt-4 hover:underline flex items-center gap-1">
-                                Show More <ChevronDown className="w-3 h-3" />
+
+                            {/* Label + Radio */}
+                            <div className="flex items-center justify-center gap-3">
+                                <div
+                                    className={cn(
+                                        "h-5 w-5 rounded-full border-2 flex items-center justify-center",
+                                        activeTab !== 'COD'
+                                            ? "border-green-500"
+                                            : "border-gray-300"
+                                    )}
+                                >
+                                    {activeTab !== 'COD' && (
+                                        <div className="h-2.5 w-2.5 rounded-full bg-green-500" />
+                                    )}
+                                </div>
+                                <span className="text-sm font-medium text-gray-800">
+                                    UPI / Credit / Debit / Netbanking
+                                </span>
+                            </div>
+
+
+                        </div>
+
+                        {/* CASH ON DELIVERY CARD */}
+                        <div
+                            onClick={() => setActiveTab('COD')}
+                            className={cn(
+                                "cursor-pointer rounded-xl border-2 p-6 transition-all",
+                                activeTab === 'COD'
+                                    ? "border-yellow-500 bg-yellow-50"
+                                    : "border-gray-200"
+                            )}
+                        >
+                            <div className="flex items-center justify-center gap-4 mb-4">
+                                <Image src={codIcon} alt="Cash on Delivery" width={40} height={40} className="object-contain" />
+                            </div>
+
+                            <div className="flex items-center justify-center gap-3">
+                                <div
+                                    className={cn(
+                                        "h-5 w-5 rounded-full border-2 flex items-center justify-center",
+                                        activeTab === 'COD'
+                                            ? "border-green-500"
+                                            : "border-gray-300"
+                                    )}
+                                >
+                                    {activeTab === 'COD' && (
+                                        <div className="h-2.5 w-2.5 rounded-full bg-green-500" />
+                                    )}
+                                </div>
+                                <span className="text-sm font-medium text-gray-800">
+                                    Cash On Delivery
+                                </span>
+                            </div>
+                        </div>
+                        <p className="flex items-center text-xs text-gray-500 mt-2">
+                            Powered by <span className="font-semibold">Razorpay</span> Secure
+                            Payments
+                        </p>
+                    </div>
+                </div>
+
+                {/* Selected Address Snippet */}
+                {selectedAddress && (
+                    <div className="bg-[#EAF4EF] border border-[#DDEBDD] rounded-2xl p-6 shadow-sm">
+                        <h3 className="text-xs font-bold text-emerald-800 uppercase tracking-widest mb-3">SHIPPING TO</h3>
+                        <div className="flex justify-between items-start">
+                            <div className="text-sm">
+                                <p className="font-bold text-gray-900 underline underline-offset-4 decoration-emerald-200">{selectedAddress?.name}</p>
+                                <p className="text-gray-600 mt-1">{selectedAddress?.addressLine1}, {selectedAddress?.city}</p>
+                            </div>
+                            <button
+                                onClick={() => router.push('/checkout/address')}
+                                className="text-[10px] font-bold text-emerald-700 bg-white border border-emerald-100 px-3 py-1.5 rounded-lg hover:bg-emerald-50 transition-colors uppercase tracking-wider shadow-sm"
+                            >
+                                Change
                             </button>
                         </div>
-
-                        {/* Payment Modes */}
-                        <div>
-                            <h3 className="text-lg font-bold text-stone-900 mb-4">Choose Payment Mode</h3>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {/* Online Payment Card */}
-                                <div
-                                    onClick={() => setActiveTab('RECOMMENDED')}
-                                    className={cn(
-                                        "relative p-6 rounded-lg border-2 cursor-pointer transition-all flex flex-col justify-between min-h-[160px]",
-                                        activeTab !== 'COD'
-                                            ? "border-yellow-400 bg-white shadow-sm ring-1 ring-yellow-400"
-                                            : "border-stone-200 bg-white hover:border-stone-300"
-                                    )}
-                                >
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="flex gap-2">
-                                            <img src="https://placehold.co/40x25?text=VISA" alt="Visa" className="h-5" />
-                                            <img src="https://placehold.co/40x25?text=MC" alt="Mastercard" className="h-5" />
-                                            <img src="https://placehold.co/40x25?text=RuPay" alt="RuPay" className="h-5" />
-                                            <img src="https://placehold.co/40x25?text=UPI" alt="UPI" className="h-5" />
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center gap-3">
-                                        <div className={cn(
-                                            "w-5 h-5 rounded-full border flex items-center justify-center",
-                                            activeTab !== 'COD' ? "border-emerald-500" : "border-stone-400"
-                                        )}>
-                                            {activeTab !== 'COD' && <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full" />}
-                                        </div>
-                                        <span className="font-bold text-stone-800 text-sm uppercase">UPI/CREDIT-DEBIT/NETBANKING</span>
-                                    </div>
-
-                                    <div className="mt-4 text-[10px] text-stone-500 flex items-center gap-1">
-                                        Powered by <span className="font-bold text-stone-700">Razorpay</span> Secure Payments
-                                    </div>
-                                </div>
-
-                                {/* COD Card */}
-                                <div
-                                    onClick={() => setActiveTab('COD')}
-                                    className={cn(
-                                        "relative p-6 rounded-lg border-2 cursor-pointer transition-all flex flex-col justify-center min-h-[160px]",
-                                        activeTab === 'COD'
-                                            ? "border-emerald-500 bg-white shadow-sm"
-                                            : "border-stone-200 bg-white hover:border-stone-300"
-                                    )}
-                                >
-                                    <div className="flex flex-col items-center justify-center gap-4 text-center">
-                                        <Banknote className="w-8 h-8 text-stone-800" />
-
-                                        <div className="flex items-center gap-3">
-                                            <div className={cn(
-                                                "w-5 h-5 rounded-full border flex items-center justify-center",
-                                                activeTab === 'COD' ? "border-emerald-500" : "border-stone-400"
-                                            )}>
-                                                {activeTab === 'COD' && <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full" />}
-                                            </div>
-                                            <span className="font-bold text-stone-800 text-sm uppercase">CASH ON DELIVERY</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                     </div>
+                )}
+            </div>
 
-                    <div className="lg:col-span-4 mt-8 lg:mt-0">
-                        <PriceDetails
-                            button={
-                                <button
-                                    onClick={handlePlaceOrder}
-                                    disabled={isPlacingOrder}
-                                    className="w-full bg-[#A0522D] hover:bg-[#8B4513] text-white font-bold py-3.5 rounded-sm uppercase tracking-wider text-sm transition-colors shadow-sm flex items-center justify-center gap-2"
-                                >
-                                    {isPlacingOrder ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Place Order'}
-                                </button>
-                            }
-                        />
-                    </div>
-                </div>
+            <div className="lg:col-span-1 mt-8 lg:mt-0 space-y-6">
+                <PriceDetails
+                    button={
+                        <button
+                            onClick={handlePlaceOrder}
+                            disabled={isPlacingOrder}
+                            className="w-full bg-[#346800] hover:bg-[#2a5400] text-white font-bold py-3.5 rounded-xl uppercase tracking-wider text-sm transition-all shadow-md flex items-center justify-center gap-2 active:scale-[0.98]"
+                        >
+                            {isPlacingOrder ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm Order'}
+                        </button>
+                    }
+                />
+
+                <button
+                    onClick={() => router.push('/checkout/address')}
+                    className="w-full text-zinc-500 text-xs font-bold uppercase tracking-widest hover:text-zinc-800 transition-colors"
+                >
+                    ← Back to Address
+                </button>
             </div>
         </div>
     );

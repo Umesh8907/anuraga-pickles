@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Trash2, Plus, Minus, ArrowRight, ShoppingCart, MapPin, Tag, Gift, Heart, ChevronDown, Check } from 'lucide-react'
 import { useCart, useRemoveFromCart, useUpdateCartItem } from '@/hooks/useCart'
 import { cn } from '@/lib/utils'
@@ -10,6 +11,7 @@ import { useAuthModalStore } from '@/store/useAuthModalStore'
 import { useRouter } from 'next/navigation'
 import PriceDetails from '@/components/checkout/PriceDetails'
 import { useAddress } from '@/hooks/useAddress'
+import productimg from '@/assets/Productimg.png'
 
 export default function CartPage() {
     const { data: cartData, isLoading } = useCart();
@@ -20,9 +22,6 @@ export default function CartPage() {
     const { openModal } = useAuthModalStore();
     const router = useRouter();
 
-    // Mock state for UI elements
-    const [donationChecked, setDonationChecked] = useState(false);
-
     const cartItems = cartData?.items || [];
 
     // Get default address for "Deliver to" snippet
@@ -32,8 +31,8 @@ export default function CartPage() {
 
     if (cartItems.length === 0) {
         return (
-            <div className="min-h-screen bg-stone-50 pt-20 flex flex-col items-center justify-center p-4">
-                <div className="bg-white p-12 rounded-sm shadow-sm text-center max-w-md w-full border border-stone-100">
+            <div className="min-h-screen bg-[#fbf6ee] pt-20 flex flex-col items-center justify-center p-4">
+                <div className="bg-white p-12 rounded-2xl shadow-sm text-center max-w-md w-full border border-stone-100">
                     <div className="w-24 h-24 bg-stone-50 rounded-full flex items-center justify-center mx-auto mb-6">
                         <ShoppingCart className="w-10 h-10 text-stone-300" />
                     </div>
@@ -41,7 +40,7 @@ export default function CartPage() {
                     <p className="text-stone-500 mb-8 text-sm">There is nothing in your bag. Let's add some items.</p>
                     <Link
                         href="/collections/all-products"
-                        className="inline-block border border-rose-500 text-rose-500 font-bold py-3 px-10 rounded-sm hover:bg-rose-50 transition-all uppercase tracking-wider text-sm"
+                        className="inline-block border border-rose-500 text-rose-500 font-bold py-3 px-10 rounded-xl hover:bg-rose-50 transition-all uppercase tracking-wider text-sm"
                     >
                         Add Items From Wishlist
                     </Link>
@@ -51,175 +50,169 @@ export default function CartPage() {
     }
 
     return (
-        <div className="bg-stone-50 min-h-screen pb-20">
-            <div className="bg-white border-b border-stone-200 py-4">
-                <div className="max-w-5xl mx-auto px-4 sm:px-6 text-sm text-stone-500">
-                    <Link href="/" className="hover:text-stone-900">Home</Link> / <span>Shop</span> / <span className="font-bold text-stone-900">Cart</span>
+        <div className="grid gap-8 lg:grid-cols-3 lg:gap-12">
+            {/* Left Column */}
+            <div className="lg:col-span-2 space-y-4">
+
+                {/* Deliver To Section (AddressBlock Style) */}
+                <div className="bg-[#EAF4EF] border border-[#DDEBDD] rounded-2xl px-6 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+                    <div className="flex gap-3 items-start">
+                        <div className="bg-[#2F6B3D]/10 text-[#2F6B3D] p-2 rounded-full">
+                            <MapPin size={18} />
+                        </div>
+                        {user ? (
+                            <div>
+                                <p className="text-sm text-gray-700">
+                                    Deliver to:{" "}
+                                    <span className="font-semibold text-black">
+                                        {defaultAddress ? `${defaultAddress.name}, ${defaultAddress.pincode}` : 'Select Address'}
+                                    </span>
+                                </p>
+                                <p className="text-sm text-gray-600 mt-1">
+                                    {defaultAddress ? `${defaultAddress.addressLine1}, ${defaultAddress.city}` : 'Please add an address'}
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="flex-1 text-left">
+                                <h3 className="text-base font-semibold text-gray-900">Login to see saved addresses</h3>
+                                <p className="text-sm text-gray-600">Add your delivery address to continue</p>
+                            </div>
+                        )}
+                    </div>
+                    <button
+                        onClick={() => {
+                            if (user) router.push('/checkout/address');
+                            else openModal('LOGIN');
+                        }}
+                        className="bg-[#346800] inline-flex items-center whitespace-nowrap text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-[#2a5400] transition"
+                    >
+                        {defaultAddress ? 'CHANGE ADDRESS' : 'ADD ADDRESS'}
+                    </button>
+
+                </div>
+
+                {/* Cart Items List */}
+                <div className="space-y-4">
+                    {cartItems.map((item) => (
+                        <div key={item._id} className="w-full rounded-2xl border bg-white p-4 shadow-sm relative group transition-all duration-200">
+                            <div className="flex gap-4">
+                                {/* Image */}
+                                <div className="flex h-28 w-28 items-center justify-center rounded-2xl bg-[#EAF5E6] flex-shrink-0">
+                                    <div className="relative h-[90px] w-[90px]">
+                                        <Image
+                                            src={item.product?.images?.[0] || productimg}
+                                            alt={item.product?.name || 'Product'}
+                                            fill
+                                            className="object-contain rounded-lg"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Content */}
+                                <div className="flex flex-1 flex-col gap-2 py-1">
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div>
+                                            <h3 className="text-[15px] font-semibold text-zinc-900">
+                                                {item.product?.name}
+                                            </h3>
+                                            <p className="text-sm text-zinc-500">{item.variantLabel}</p>
+                                        </div>
+
+                                        <button
+                                            onClick={() => removeFromCart(item._id)}
+                                            className="rounded-xl p-2 text-zinc-500 hover:bg-zinc-100 hover:text-rose-500 transition-colors"
+                                            aria-label="Remove item"
+                                        >
+                                            <Trash2 size={18} />
+                                        </button>
+                                    </div>
+
+                                    {/* Quantity + Size */}
+                                    <div className="flex flex-wrap items-center gap-6 mt-1">
+                                        {/* Quantity */}
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-sm font-medium text-zinc-700">Quantity</span>
+                                            <div className="flex items-center overflow-hidden rounded-xl border-2 border-zinc-100 bg-white shadow-sm">
+                                                <button
+                                                    disabled={item.quantity <= 1}
+                                                    onClick={() => updateCartItem({ itemId: item._id, quantity: item.quantity - 1 })}
+                                                    className="p-2.5 hover:bg-zinc-50 disabled:opacity-30 transition-colors"
+                                                    aria-label="Decrease quantity"
+                                                >
+                                                    <Minus size={14} className="text-zinc-600" />
+                                                </button>
+                                                <span className="min-w-[44px] text-center text-sm font-bold text-zinc-900 border-x-2 border-zinc-100/50">
+                                                    {item.quantity}
+                                                </span>
+                                                <button
+                                                    onClick={() => updateCartItem({ itemId: item._id, quantity: item.quantity + 1 })}
+                                                    className="p-2.5 hover:bg-zinc-50 transition-colors"
+                                                    aria-label="Increase quantity"
+                                                >
+                                                    <Plus size={14} className="text-zinc-600" />
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* Size */}
+                                        <div className="flex flex-wrap items-center gap-3">
+                                            <span className="text-sm font-medium text-zinc-700">Size</span>
+                                            <div className="flex flex-wrap gap-2">
+                                                {['200g', '500g', '1kg'].map(size => (
+                                                    <button
+                                                        key={size}
+                                                        className={cn(
+                                                            "rounded-full border px-4 py-1 text-xs font-medium transition",
+                                                            item.variantLabel?.includes(size) || (size === '500g' && !item.variantLabel)
+                                                                ? "border-green-600 bg-green-600 text-white shadow-sm"
+                                                                : "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50"
+                                                        )}
+                                                    >
+                                                        {size}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Price */}
+                                    <div className="pt-2 flex items-baseline gap-2">
+                                        <p className="text-[15px] font-bold text-zinc-900">
+                                            ₹{item.price.toLocaleString()}
+                                        </p>
+                                        <span className="text-xs text-zinc-500 line-through">
+                                            ₹{Math.round(item.price * 1.3).toLocaleString()}
+                                        </span>
+                                        <span className="text-xs font-medium text-green-700">
+                                            Save ₹{Math.round(item.price * 0.3).toLocaleString()}
+                                        </span>
+                                    </div>
+                                    <p className="text-[10px] text-zinc-400">Inclusive of all taxes</p>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
 
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-8">
-                <div className="lg:grid lg:grid-cols-12 lg:gap-8 items-start">
-                    {/* Left Column */}
-                    <div className="lg:col-span-8 space-y-4">
-                        {/* Deliver To Section */}
-                        {user && (
-                            <div className="bg-emerald-50/50 p-4 rounded-sm border border-emerald-100 flex justify-between items-center">
-                                <div className="text-sm">
-                                    <span className="text-stone-600 mr-1">Deliver to:</span>
-                                    <span className="font-bold text-stone-900">{defaultAddress ? defaultAddress.name : 'Select Address'}</span>
-                                    {defaultAddress && <span className="text-stone-900">, {defaultAddress.pincode}</span>}
-                                    <div className="text-xs text-stone-500 mt-0.5. truncate max-w-xs">
-                                        {defaultAddress ? `${defaultAddress.addressLine1}, ${defaultAddress.city}` : 'Login to view addresses'}
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={() => router.push('/checkout/address')}
-                                    className="text-white text-xs font-bold bg-emerald-700 px-4 py-2 rounded-sm hover:bg-emerald-800 uppercase shadow-sm"
-                                >
-                                    Change Address
-                                </button>
-                            </div>
-                        )}
-
-                        {/* Available Offers */}
-                        <div className="bg-white p-5 rounded-sm border border-stone-200">
-                            <div className="flex items-center gap-2 mb-3">
-                                <Tag className="w-4 h-4 text-stone-900" />
-                                <span className="font-bold text-stone-900 text-sm">Available Offers</span>
-                            </div>
-                            <ul className="space-y-3 text-sm text-stone-600 pl-1">
-                                <li className="flex items-start gap-3">
-                                    <span className="mt-2 w-1.5 h-1.5 bg-stone-300 rounded-full flex-shrink-0" />
-                                    <span className="leading-relaxed">10% Instant Discount on Canara Bank Credit Card on min spend of ₹3,500</span>
-                                </li>
-                                <li className="flex items-start gap-3">
-                                    <span className="mt-2 w-1.5 h-1.5 bg-stone-300 rounded-full flex-shrink-0" />
-                                    <span className="leading-relaxed">5% Unlimited Cashback on Flipkart Axis Bank Credit Card</span>
-                                </li>
-                            </ul>
-                            <button className="text-emerald-600 text-xs font-bold mt-4 hover:underline flex items-center gap-1">
-                                Show More <ChevronDown className="w-3 h-3" />
-                            </button>
-                        </div>
-
-                        {/* Cart Items List */}
-                        <div className="space-y-4">
-                            {cartItems.map((item) => (
-                                <div key={item._id} className="bg-white p-4 rounded-sm border border-stone-200 relative group">
-                                    <button
-                                        onClick={() => removeFromCart(item._id)}
-                                        className="absolute top-4 right-4 text-stone-400 hover:text-stone-800"
-                                    >
-                                        <Trash2 className="w-5 h-5" />
-                                    </button>
-
-                                    <div className="flex gap-6">
-                                        {/* Image */}
-                                        <div className="flex-shrink-0 w-32 h-32 bg-stone-50 rounded-sm overflow-hidden">
-                                            <img
-                                                src={item.product?.images?.[0] || 'https://placehold.co/150x200?text=No+Image'}
-                                                alt={item.product?.name || 'Product'}
-                                                className="w-full h-full object-cover"
-                                            />
-                                        </div>
-
-                                        {/* Content */}
-                                        <div className="flex-1 py-1">
-                                            <h3 className="font-bold text-stone-900 text-base mb-1">{item.product?.name}</h3>
-                                            <p className="text-stone-500 text-sm mb-4">{item.variantLabel}</p>
-
-                                            <div className="flex flex-wrap gap-6 mb-4">
-                                                {/* Quantity Selector */}
-                                                <div className="flex items-center gap-3">
-                                                    <span className="text-xs font-bold text-stone-500 bg-stone-100 px-2 py-1 rounded">Qty</span>
-                                                    <div className="flex items-center border border-stone-300 rounded-sm">
-                                                        <button
-                                                            disabled={item.quantity <= 1}
-                                                            onClick={() => updateCartItem({ itemId: item._id, quantity: item.quantity - 1 })}
-                                                            className="px-2 py-1 hover:bg-stone-50 disabled:opacity-50"
-                                                        >
-                                                            <Minus className="w-3 h-3" />
-                                                        </button>
-                                                        <span className="px-2 text-sm font-bold w-6 text-center">{item.quantity}</span>
-                                                        <button
-                                                            onClick={() => updateCartItem({ itemId: item._id, quantity: item.quantity + 1 })}
-                                                            className="px-2 py-1 hover:bg-stone-50"
-                                                        >
-                                                            <Plus className="w-3 h-3" />
-                                                        </button>
-                                                    </div>
-                                                </div>
-
-                                                {/* Size Selector (Mock) */}
-                                                <div className="flex items-center gap-3">
-                                                    <span className="text-xs font-bold text-stone-500 bg-stone-100 px-2 py-1 rounded">Size</span>
-                                                    <div className="flex gap-2">
-                                                        {['200g', '500g', '1kg'].map(size => (
-                                                            <button
-                                                                key={size}
-                                                                className={cn(
-                                                                    "px-3 py-1 rounded-full border text-xs font-medium transition-colors",
-                                                                    item.variantLabel?.includes(size) || (size === '500g')
-                                                                        ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                                                                        : "border-stone-200 text-stone-600 hover:border-stone-300"
-                                                                )}
-                                                            >
-                                                                {size}
-                                                            </button>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div className="flex items-center gap-3">
-                                                <span className="font-bold text-stone-900 text-lg">₹{item.price.toLocaleString()}</span>
-                                                <span className="text-stone-400 line-through text-sm">₹{Math.round(item.price * 1.3).toLocaleString()}</span>
-                                                <span className="text-rose-500 text-xs font-bold">(Inclusive of all taxes)</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Right Column (Sidebar) */}
-                    <div className="lg:col-span-4 mt-8 lg:mt-0 space-y-6">
-
-                        {/* Coupons */}
-                        <div className="bg-white p-5 rounded-sm border border-stone-200">
-                            <div className="text-xs font-bold text-stone-500 uppercase tracking-wider mb-4">COUPONS</div>
-                            <div className="flex justify-between items-center">
-                                <div className="flex items-center gap-3">
-                                    <Tag className="w-4 h-4 text-stone-900" />
-                                    <span className="font-bold text-stone-900 text-sm">Apply Coupons</span>
-                                </div>
-                                <button className="text-emerald-600 text-xs font-bold border border-emerald-600 px-4 py-1.5 rounded-sm hover:bg-emerald-50 uppercase">
-                                    APPLY
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Price Details */}
-                        <PriceDetails
-                            button={
-                                <button
-                                    onClick={() => {
-                                        if (user) {
-                                            router.push('/checkout/address');
-                                        } else {
-                                            openModal('LOGIN');
-                                        }
-                                    }}
-                                    className="w-full bg-[#A0522D] hover:bg-[#8B4513] text-white font-bold py-3.5 rounded-sm uppercase tracking-wider text-sm transition-colors shadow-sm"
-                                >
-                                    Place Order
-                                </button>
-                            }
-                        />
-                    </div>
-                </div>
+            {/* Right Column (Sidebar) */}
+            <div className="lg:col-span-1 space-y-6">
+                <PriceDetails
+                    button={
+                        <button
+                            onClick={() => {
+                                if (user) {
+                                    router.push('/checkout/address');
+                                } else {
+                                    openModal('LOGIN');
+                                }
+                            }}
+                            className="w-full bg-[#B85B2B] hover:opacity-95 text-white font-bold py-3.5 rounded-xl uppercase tracking-wider text-sm transition-all shadow-md active:scale-[0.98]"
+                        >
+                            Proceed to Address
+                        </button>
+                    }
+                />
             </div>
         </div>
     )

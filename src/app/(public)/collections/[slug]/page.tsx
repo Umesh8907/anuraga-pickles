@@ -27,6 +27,7 @@ export default async function CollectionPage({
     params,
 }: Props) {
     const { slug } = await params
+    console.log("CollectionPage slug:", slug);
 
     return (
         <main className="min-h-screen bg-[#fbf6ee]">

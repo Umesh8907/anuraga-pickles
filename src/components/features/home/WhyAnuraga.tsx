@@ -25,7 +25,7 @@ const data = [
 
 const WhyAnuraga = () => {
   return (
-    <section className="relative w-full overflow-hidden bg-[#FDEAA3]">
+    <section id="whyanuraga" className="relative w-full overflow-hidden bg-[#FDEAA3]">
 
       {/* BACKGROUND IMAGE */}
       <div className="absolute inset-0 z-0">

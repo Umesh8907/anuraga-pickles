@@ -4,6 +4,16 @@ import React from 'react';
 import { useCart } from '@/hooks/useCart';
 import { cn } from '@/lib/utils';
 
+import Image from "next/image";
+
+import visa from "@/assets/visa.png";
+import mastercard from "@/assets/mastercard.png";
+import rupay from "@/assets/rupay.png";
+import upi from "@/assets/upi.png";
+import netbanking from "@/assets/netbanking.png";
+import cod from "@/assets/Vector.png";
+
+
 interface PriceDetailsProps {
     className?: string;
     button?: React.ReactNode;
@@ -22,44 +32,63 @@ export default function PriceDetails({ className, button }: PriceDetailsProps) {
     if (cartItems.length === 0) return null;
 
     return (
-        <div className={cn("space-y-6", className)}>
-            <div className="bg-white">
-                <h3 className="text-base font-bold text-stone-900 mb-6">Order Summary</h3>
+        <div className={cn("sticky top-24 flex flex-col gap-4", className)}>
+            {/* Coupons */}
+            <div className="rounded-2xl border bg-white p-5 shadow-sm">
+                <h3 className="text-sm font-semibold text-zinc-900 border-b border-zinc-100 pb-3 mb-3">COUPONS</h3>
+                <div className="flex items-center justify-between gap-3">
+                    <div className="text-sm font-medium text-zinc-700">
+                        Apply Coupons
+                    </div>
+                    <button
+                        type="button"
+                        className="rounded-xl border border-green-600 px-4 py-2 text-sm font-semibold text-green-700 hover:bg-green-50"
+                    >
+                        APPLY
+                    </button>
+                </div>
+            </div>
 
-                <div className="space-y-4 mb-6">
-                    <div className="flex justify-between items-center text-sm font-medium">
-                        <span className="text-stone-600">Total MRP</span>
-                        <span className="text-stone-900">₹{totalMRP}</span>
+            {/* Order Summary */}
+            <div className="rounded-2xl border bg-white p-5 shadow-sm">
+                <h3 className="text-base font-semibold text-zinc-900 mb-6">Order Summary</h3>
+
+                <div className="space-y-3 mb-6 text-sm">
+                    <div className="flex justify-between items-center text-zinc-600">
+                        <span>Total MRP</span>
+                        <span className="font-medium">₹{totalMRP.toLocaleString()}</span>
                     </div>
 
-                    <div className="flex justify-between items-center text-sm font-medium">
-                        <span className="text-stone-600">Discount on MRP</span>
-                        <span className="text-emerald-500">-₹{discount}</span>
+                    <div className="flex justify-between items-center text-zinc-600">
+                        <span>Discount on MRP</span>
+                        <span className="font-medium text-green-700">-₹{discount.toLocaleString()}</span>
                     </div>
 
-                    <div className="flex justify-between items-center text-sm font-medium">
-                        <span className="text-stone-600">Coupon Discount</span>
-                        <button className="text-rose-500 hover:text-rose-600 text-sm font-medium">Apply Coupon</button>
+                    <div className="flex justify-between items-center text-zinc-600">
+                        <span>Coupon Discount</span>
+                        <button className="text-sm font-semibold text-green-700 hover:underline">Apply Coupon</button>
                     </div>
 
-                    <div className="flex justify-between items-center text-sm font-medium">
-                        <span className="text-stone-600">Delivery Charge</span>
-                        <span className="text-stone-900">
-                            {shipping === 0 ? <span className="text-emerald-500">Free</span> : `₹${shipping}`}
+                    <div className="flex justify-between items-center text-zinc-600">
+                        <span>Delivery Charge</span>
+                        <span className="font-medium">
+                            {shipping === 0 ? <span className="text-green-700">Free</span> : `₹${shipping}`}
                         </span>
                     </div>
                 </div>
 
-                <div className="border-t border-stone-200 pt-4 mb-4">
+                <div className="border-t border-zinc-200 pt-4 mb-4">
                     <div className="flex justify-between items-center">
-                        <span className="text-base font-bold text-stone-900">Total Amount</span>
-                        <span className="text-base font-bold text-stone-900">₹{total}</span>
+                        <span className="text-base font-semibold text-zinc-900">Total Amount</span>
+                        <span className="text-base font-semibold text-zinc-900">₹{total.toLocaleString()}</span>
                     </div>
                 </div>
 
-                <div className="bg-emerald-50 p-3 rounded-sm border border-emerald-100 mb-6 text-center">
-                    <p className="text-emerald-700 font-bold text-xs">You will save ₹{discount} on this order</p>
-                </div>
+                <p className="mb-4 text-xs text-zinc-500">
+                    By placing the order, you agree to Anuraga's{" "}
+                    <span className="font-medium text-green-700 cursor-pointer">Terms of Use</span> and{" "}
+                    <span className="font-medium text-green-700 cursor-pointer">Privacy Policy</span>.
+                </p>
 
                 {button && (
                     <div className="mb-6">
@@ -67,20 +96,18 @@ export default function PriceDetails({ className, button }: PriceDetailsProps) {
                     </div>
                 )}
 
-                <div>
-                    <p className="text-[10px] font-bold text-stone-900 uppercase tracking-wider mb-2">ACCEPTED PAYMENT METHODS</p>
-                    <div className="flex gap-2">
-                        <img src="https://placehold.co/40x25?text=VISA" alt="Visa" className="h-6 w-auto" />
-                        <img src="https://placehold.co/40x25?text=MC" alt="Mastercard" className="h-6 w-auto" />
-                        <img src="https://placehold.co/40x25?text=RuPay" alt="RuPay" className="h-6 w-auto" />
-                        <img src="https://placehold.co/40x25?text=UPI" alt="UPI" className="h-6 w-auto" />
-                        <img src="https://placehold.co/40x25?text=Bank" alt="Bank" className="h-6 w-auto" />
+                {/* Accepted Payment Methods */}
+                <div className="pt-4 border-t border-zinc-100">
+                    <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3">ACCEPTED PAYMENT METHODS</p>
+                    <div className="mt-3 flex items-center gap-5">
+                        <Image src={visa} alt="Visa" className="h-4 w-auto object-contain" />
+                        <Image src={mastercard} alt="Mastercard" className="h-4 w-auto object-contain" />
+                        <Image src={rupay} alt="RuPay" className="h-4 w-auto object-contain" />
+                        <Image src={cod} alt="cod" className="h-4 w-auto object-contain" />
+                        <Image src={netbanking} alt="Netbanking" className="h-4 w-auto object-contain" />
+                        <Image src={upi} alt="UPI" className="h-4 w-auto object-contain" />
                     </div>
                 </div>
-            </div>
-
-            <div className="text-xs text-stone-500">
-                By placing the order, you agree to anuraga's <span className="font-bold text-emerald-700">Terms of Use</span> and <span className="font-bold text-emerald-700">Privacy Policy</span>
             </div>
         </div>
     );

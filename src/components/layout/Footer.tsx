@@ -42,8 +42,8 @@ const Footer: React.FC = () => {
                     <h3 className="font-semibold mb-4">About Us</h3>
                     <ul className="space-y-2 text-sm">
                         {[
-                            { name: "Our Story", href: "/about" },
-                            { name: "Meet the Artisans", href: "/about/artisans" }
+                            { name: "Our Story", href: "/#whyanuraga" },
+                            { name: "Meet the Artisans", href: "/#carouselcard" }
                         ].map((item) => (
                             <li key={item.name}>
                                 <Link href={item.href} className="hover:text-green-300 cursor-pointer transition-colors">

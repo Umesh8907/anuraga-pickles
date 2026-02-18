@@ -38,7 +38,7 @@ export default function ArtisansCarousel() {
   };
 
   return (
-    <section className="bg-[#fffaf3] py-20 overflow-hidden">
+    <section id="carouselcard" className="bg-[#fffaf3] py-20 overflow-hidden">
       {/* Header */}
       <div className="text-center mb-14 px-4">
         <h2 className="text-center font-cinzel font-bold uppercase text-[18px] sm:text-[22px] md:text-[28px] lg:text-[36px] leading-tight lg:leading-[49px] text-[#a94f1d] mb-4 sm:mb-5 lg:mb-6">

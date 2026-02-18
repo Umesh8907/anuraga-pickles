@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -29,11 +30,13 @@ const HEADER_HEIGHT = 96;
 const Nav = () => {
     const [menuOpen, setMenuOpen] = useState(false);
     const [profileOpen, setProfileOpen] = useState(false);
-    const [shopOpen, setShopOpen] = useState(false);
-    const [storyOpen, setStoryOpen] = useState(false);
+    const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
+    const [expandedMobileSections, setExpandedMobileSections] = useState<string[]>([]);
 
+    const pathname = usePathname();
+    const navRef = useRef<HTMLDivElement | null>(null);
     const profileRef = useRef<HTMLDivElement | null>(null);
 
     // 🔥 FUNCTIONALITY
@@ -46,28 +49,60 @@ const Nav = () => {
     const cartItemCount =
         cart?.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
 
+    // Navigation Links structure
+    const navLinks = [
+        {
+            name: "Shop",
+            href: "/collections/all-products",
+            isDropdown: true,
+            children: [
+                { name: "All Products", href: "/collections/all-products" },
+                ...(collections?.filter(col => col.slug !== 'all-products').map(col => ({
+                    name: col.name,
+                    href: `/collections/${col.slug}`
+                })) || [
+                        { name: "Pickles", href: "/collections/pickles" },
+                        { name: "Seasonal Collections", href: "/collections/seasonal", isComingSoon: true },
+                        { name: "Gift Sets", href: "/collections/gift-sets", isComingSoon: true },
+                    ]),
+            ],
+        },
+        {
+            name: "Our Story",
+            href: "/about",
+            isDropdown: true,
+            children: [
+                { name: "About ANURAGA", href: "/#whyanuraga" },
+                { name: "Meet the Artisans", href: "/#carouselcard" },
+                { name: "Our Production Process", href: "/#howitsmade" },
+            ],
+        },
+        { name: "Wellness Hub", href: "/blog" },
+        { name: "Recipes", href: "/recipes" },
+        { name: "Contact", href: "/contact" },
+    ];
+
     // Hydration fix
     useEffect(() => {
         setMounted(true);
     }, []);
 
+    // Close menus on route change
+    useEffect(() => {
+        setMenuOpen(false);
+        setProfileOpen(false);
+        setActiveDropdown(null);
+    }, [pathname]);
+
     // close dropdown outside
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
-            const target = e.target as Element;
-            
-            // Don't close dropdowns if clicking on dropdown content
-            if (target.closest('.dropdown-content')) {
-                return;
-            }
-            
-            if (
-                profileRef.current &&
-                !profileRef.current.contains(e.target as Node)
-            ) {
+            const isInsideNav = navRef.current && navRef.current.contains(e.target as Node);
+            const isInsideProfile = profileRef.current && profileRef.current.contains(e.target as Node);
+
+            if (!isInsideNav && !isInsideProfile) {
+                setActiveDropdown(null);
                 setProfileOpen(false);
-                setShopOpen(false);
-                setStoryOpen(false);
             }
         };
 
@@ -76,9 +111,16 @@ const Nav = () => {
             document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+    const toggleMobileSection = (name: string) => {
+        setExpandedMobileSections(prev =>
+            prev.includes(name) ? prev.filter(s => s !== name) : [...prev, name]
+        );
+    };
+
     const handleLogout = () => {
         setIsLogoutModalOpen(true);
-        setProfileOpen(false); // Close dropdown if open
+        setProfileOpen(false);
+        setMenuOpen(false);
     };
 
     const handleConfirmLogout = () => {
@@ -86,176 +128,79 @@ const Nav = () => {
         setIsLogoutModalOpen(false);
     };
 
-    // Prepare navigation links with dynamic collections
-    const navLinks = [
-        {
-            name: 'Shop',
-            href: '/collections/all-products',
-            isDropdown: true,
-            children: [
-                { name: 'All Products', href: '/collections/all-products' },
-                ...(collections?.filter(col => col.slug !== 'all-products').map(col => ({
-                    name: col.name,
-                    href: `/collections/${col.slug}`
-                })) || [
-                    { name: 'Pickles', href: '/collections/pickles' },
-                    { name: 'Cold-Pressed Oils', href: '#', isComingSoon: true },
-                    { name: 'Spices & Masalas', href: '#', isComingSoon: true },
-                ]),
-            ],
-        },
-        {
-            name: 'Our Story',
-            href: '/about',
-            isDropdown: true,
-            children: [
-                { name: 'About ANURAGA', href: '/about' },
-                { name: 'The Women Behind Our Food', href: '/women-behind-food' },
-                { name: 'Our Production Process', href: '/production-process' },
-            ],
-        },
-        { name: 'Wellness Hub', href: '/blog' },
-        { name: 'Recipes', href: '/recipes' },
-        { name: 'Contact', href: '/contact' },
-    ];
-
     return (
         <>
             <header
                 className="w-full z-40 bg-[#FFF9EC] border-b border-black/10 relative font-poppins"
                 style={{ height: HEADER_HEIGHT }}
             >
-                <div
-                    className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12 flex items-center justify-between h-full"
-                >
+                <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12 flex items-center justify-between h-full">
                     {/* LOGO */}
-                    <Link href="/" className="shrink-0">
+                    <Link href="/" className="shrink-0 group">
                         <Image
                             src={logo}
                             alt="Anuraga Logo"
                             width={150}
                             height={80}
                             priority
-                            className="w-[120px] sm:w-[140px] lg:w-[150px] h-auto"
+                            className="w-[120px] sm:w-[140px] lg:w-[150px] h-auto transition-transform group-hover:scale-105"
                         />
                     </Link>
 
                     {/* DESKTOP NAVIGATION */}
-                    <nav className="hidden lg:flex items-center gap-10 relative">
-                        {/* SHOP */}
-                        <div className="relative">
-                            <button
-                                onClick={() => {
-                                    setShopOpen((p) => !p);
-                                    setStoryOpen(false);
-                                }}
-                                className="font-poppins font-medium text-[20px] flex items-center gap-1 text-black hover:text-[#C1572A] transition-colors"
-                            >
-                                Shop
-                                <FaChevronDown className={cn("text-xs mt-[2px] transition-transform duration-200", shopOpen && "rotate-180")} />
-                            </button>
-
-                            {shopOpen && (
-                                <div className="dropdown-content absolute top-10 w-56 bg-white rounded-xl shadow-lg border border-black/10 overflow-hidden z-[51]">
-                                    <Link
-                                        href="/collections/all-products"
-                                        className="block px-4 py-3 hover:bg-[#FFF9EC] text-black hover:text-[#C1572A] transition-colors"
+                    <nav className="hidden lg:flex items-center gap-10 relative" ref={navRef}>
+                        {navLinks.map((link) => (
+                            <div key={link.name} className="relative">
+                                {link.isDropdown ? (
+                                    <button
+                                        onClick={() => setActiveDropdown(activeDropdown === link.name ? null : link.name)}
+                                        className={cn(
+                                            "font-poppins font-medium text-[20px] flex items-center gap-1 transition-colors",
+                                            activeDropdown === link.name ? "text-[#C1572A]" : "text-black hover:text-[#C1572A]"
+                                        )}
                                     >
-                                        All Products
-                                    </Link>
-                                    {collections?.filter(col => col.slug !== 'all-products').map((col) => (
-                                        <Link
-                                            key={col.slug}
-                                            href={`/collections/${col.slug}`}
-                                            className="block px-4 py-3 hover:bg-[#FFF9EC] text-black hover:text-[#C1572A] transition-colors"
-                                        >
-                                            {col.name}
-                                        </Link>
-                                    ))}
-                                    {/* Fallback Static Links if collections not loaded yet */}
-                                    {!collections && (
-                                        <>
-                                            <Link
-                                                href="/collections/pickles"
-                                                className="block px-4 py-3 hover:bg-[#FFF9EC] text-black hover:text-[#C1572A] transition-colors"
-                                            >
-                                                Pickles
-                                            </Link>
-                                            <Link
-                                                href="/collections/oils"
-                                                className="block px-4 py-3 hover:bg-[#FFF9EC] text-black hover:text-[#C1572A] transition-colors"
-                                            >
-                                                Cold-Pressed Oils
-                                            </Link>
-                                            <Link
-                                                href="/collections/spices"
-                                                className="block px-4 py-3 hover:bg-[#FFF9EC] text-black hover:text-[#C1572A] transition-colors"
-                                            >
-                                                Spices & Masalas
-                                            </Link>
-                                        </>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-
-                        {/* OUR STORY */}
-                        <div className="relative">
-                            <button
-                                onClick={() => {
-                                    setStoryOpen((p) => !p);
-                                    setShopOpen(false);
-                                }}
-                                className="font-poppins font-medium text-[20px] flex items-center gap-1 text-black hover:text-[#C1572A] transition-colors"
-                            >
-                                Our Story
-                                <FaChevronDown className={cn("text-xs mt-[2px] transition-transform duration-200", storyOpen && "rotate-180")} />
-                            </button>
-
-                            {storyOpen && (
-                                <div className="dropdown-content absolute top-10 w-64 bg-white rounded-xl shadow-lg border border-black/10 overflow-hidden z-[51]">
+                                        {link.name}
+                                        <FaChevronDown className={cn("text-[10px] mt-1 transition-transform duration-200", activeDropdown === link.name && "rotate-180")} />
+                                    </button>
+                                ) : (
                                     <Link
-                                        href="/about"
-                                        className="block px-4 py-3 hover:bg-[#FFF9EC] text-black hover:text-[#C1572A] transition-colors"
+                                        href={link.href}
+                                        className="font-poppins font-medium text-[20px] text-black hover:text-[#C1572A] transition-colors"
                                     >
-                                        About ANURAGA
+                                        {link.name}
                                     </Link>
-                                    <Link
-                                        href="/women-behind-food"
-                                        className="block px-4 py-3 hover:bg-[#FFF9EC] text-black hover:text-[#C1572A] transition-colors"
-                                    >
-                                        The Women Behind Our Food
-                                    </Link>
-                                    <Link
-                                        href="/production-process"
-                                        className="block px-4 py-3 hover:bg-[#FFF9EC] text-black hover:text-[#C1572A] transition-colors"
-                                    >
-                                        Our Production Process
-                                    </Link>
-                                </div>
-                            )}
-                        </div>
+                                )}
 
-                        <Link
-                            href="/blog"
-                            className="font-poppins font-medium text-[20px] text-black hover:text-[#C1572A] transition-colors"
-                        >
-                            Wellness Hub
-                        </Link>
-
-                        <Link
-                            href="/recipes"
-                            className="font-poppins font-medium text-[20px] text-black hover:text-[#C1572A] transition-colors"
-                        >
-                            Recipes
-                        </Link>
-
-                        <Link
-                            href="/contact"
-                            className="font-poppins font-medium text-[20px] text-black hover:text-[#C1572A] transition-colors"
-                        >
-                            Contact
-                        </Link>
+                                {link.isDropdown && activeDropdown === link.name && (
+                                    <div className="absolute top-[50px] left-0 w-64 bg-white rounded-xl shadow-2xl border border-black/5 overflow-hidden z-[51] animate-in fade-in slide-in-from-top-2 duration-200">
+                                        <div className="py-2">
+                                            {link.children?.map((child, idx) => (
+                                                <Link
+                                                    key={`${child.href}-${idx}`}
+                                                    href={child.href}
+                                                    onClick={() => {
+                                                        if (child.isComingSoon) return;
+                                                        setActiveDropdown(null);
+                                                        setMenuOpen(false);
+                                                    }}
+                                                    className={cn(
+                                                        "flex justify-between items-center px-4 py-3 text-[15px] font-medium transition-colors",
+                                                        child.isComingSoon
+                                                            ? "text-stone-300 cursor-not-allowed pointer-events-none"
+                                                            : "text-stone-700 hover:bg-[#FFF9EC] hover:text-[#C1572A]"
+                                                    )}
+                                                >
+                                                    {child.name}
+                                                    {child.isComingSoon && (
+                                                        <span className="text-[9px] uppercase font-bold bg-stone-100 text-stone-400 px-1.5 py-0.5 rounded-full">Soon</span>
+                                                    )}
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
                     </nav>
 
                     {/* RIGHT SIDE */}
@@ -276,51 +221,30 @@ const Nav = () => {
                             {user ? (
                                 <>
                                     <button
-                                        onClick={() => setProfileOpen((p) => !p)}
+                                        onClick={() => {
+                                            setProfileOpen(!profileOpen);
+                                            setActiveDropdown(null);
+                                        }}
                                         className="w-10 h-10 rounded-lg bg-[#C1572A] flex items-center justify-center cursor-pointer hover:bg-[#a04622] transition-colors"
                                     >
                                         <FaUser className="text-white text-sm" />
                                     </button>
 
                                     {profileOpen && (
-                                        <div className="dropdown-content absolute right-0 mt-3 w-[200px] rounded-xl bg-white shadow-lg border border-black/10 overflow-hidden z-[51]">
-                                            <div className="px-4 py-2 border-b border-stone-100 mb-1">
-                                                <p className="text-xs text-stone-500 font-medium">Signed in as</p>
+                                        <div className="absolute right-0 mt-3 w-[220px] rounded-xl bg-white shadow-2xl border border-black/5 overflow-hidden z-[51] animate-in fade-in slide-in-from-top-2 duration-200">
+                                            <div className="px-4 py-3 bg-stone-50 border-b border-stone-100 mb-1">
+                                                <p className="text-[10px] uppercase tracking-wider text-stone-500 font-bold mb-0.5">Signed in as</p>
                                                 <p className="text-sm font-bold text-stone-800 truncate">{user.name}</p>
                                             </div>
 
-                                            <Link
-                                                href="/account"
-                                                className="block px-4 py-2.5 font-poppins text-[15px] font-medium text-black hover:bg-[#FFF9EC] hover:text-[#C1572A] transition"
-                                                onClick={() => setProfileOpen(false)}
-                                            >
-                                                Profile
-                                            </Link>
-
-                                            <Link
-                                                href="/orders"
-                                                className="block px-4 py-2.5 font-poppins text-[15px] font-medium text-black hover:bg-[#FFF9EC] hover:text-[#C1572A] transition"
-                                                onClick={() => setProfileOpen(false)}
-                                            >
-                                                Orders
-                                            </Link>
+                                            <Link href="/account" className="block px-4 py-2.5 font-medium text-stone-700 hover:bg-[#FFF9EC] hover:text-[#C1572A] transition" onClick={() => setProfileOpen(false)}>Profile</Link>
+                                            <Link href="/orders" className="block px-4 py-2.5 font-medium text-stone-700 hover:bg-[#FFF9EC] hover:text-[#C1572A] transition" onClick={() => setProfileOpen(false)}>Orders</Link>
 
                                             {user.role === "ADMIN" && (
-                                                <Link
-                                                    href="/admin/dashboard"
-                                                    className="block px-4 py-2.5 font-poppins text-[15px] font-medium text-black hover:bg-[#FFF9EC] hover:text-[#C1572A] transition"
-                                                    onClick={() => setProfileOpen(false)}
-                                                >
-                                                    Admin Dashboard
-                                                </Link>
+                                                <Link href="/admin/dashboard" className="block px-4 py-2.5 font-bold text-amber-600 hover:bg-amber-50 transition" onClick={() => setProfileOpen(false)}>Admin Dashboard</Link>
                                             )}
 
-                                            <button
-                                                onClick={handleLogout}
-                                                className="w-full text-left block px-4 py-2.5 font-poppins text-[15px] font-medium text-red-600 hover:bg-stone-50 transition border-t border-stone-100 mt-1"
-                                            >
-                                                Logout
-                                            </button>
+                                            <button onClick={handleLogout} className="w-full text-left block px-4 py-3 font-bold text-red-600 hover:bg-red-50 transition border-t border-stone-100 mt-1 uppercase text-xs tracking-widest">Logout</button>
                                         </div>
                                     )}
                                 </>
@@ -349,38 +273,80 @@ const Nav = () => {
 
                         {/* MOBILE MENU BUTTON */}
                         <button
-                            onClick={() => setMenuOpen((p) => !p)}
+                            onClick={() => setMenuOpen(!menuOpen)}
                             className="lg:hidden w-10 h-10 rounded-lg bg-[#C1572A] flex items-center justify-center cursor-pointer hover:bg-[#a04622] transition-colors"
                         >
-                            {menuOpen ? (
-                                <FaTimes className="text-white text-base" />
-                            ) : (
-                                <FaBars className="text-white text-base" />
-                            )}
+                            {menuOpen ? <FaTimes className="text-white text-base" /> : <FaBars className="text-white text-base" />}
                         </button>
                     </div>
                 </div>
 
                 {/* MOBILE MENU */}
                 {menuOpen && (
-                    <div className="lg:hidden w-full bg-[#FFF9EC] border-t border-black/10 h-[calc(100vh-144px)] overflow-y-auto absolute left-0 top-[96px] z-50 shadow-xl">
-                        <div className="px-6 py-6 flex flex-col gap-4">
-                            <Link href="/collections/all-products" onClick={() => setMenuOpen(false)} className="font-poppins text-[18px] font-medium text-stone-800 hover:text-[#C1572A] transition-colors">Shop</Link>
-                            <Link href="/about" onClick={() => setMenuOpen(false)} className="font-poppins text-[18px] font-medium text-stone-800 hover:text-[#C1572A] transition-colors">Our Story</Link>
-                            <Link href="/blog" onClick={() => setMenuOpen(false)} className="font-poppins text-[18px] font-medium text-stone-800 hover:text-[#C1572A] transition-colors">Wellness Hub</Link>
-                            <Link href="/recipes" onClick={() => setMenuOpen(false)} className="font-poppins text-[18px] font-medium text-stone-800 hover:text-[#C1572A] transition-colors">Recipes</Link>
-                            <Link href="/contact" onClick={() => setMenuOpen(false)} className="font-poppins text-[18px] font-medium text-stone-800 hover:text-[#C1572A] transition-colors">Contact</Link>
+                    <div className="lg:hidden w-full bg-[#FFF9EC] border-t border-black/10 h-[calc(100vh-96px)] overflow-y-auto absolute left-0 top-[96px] z-50 shadow-xl animate-in slide-in-from-top duration-300">
+                        <div className="px-6 py-8 flex flex-col gap-2">
+                            {navLinks.map((link) => (
+                                <div key={link.name} className="border-b border-black/5 last:border-0 pb-2 mb-2">
+                                    {link.isDropdown ? (
+                                        <>
+                                            <button
+                                                onClick={() => toggleMobileSection(link.name)}
+                                                className="flex justify-between items-center w-full py-3 text-[18px] font-bold text-stone-800"
+                                            >
+                                                {link.name}
+                                                <FaChevronDown className={cn("text-xs transition-transform duration-300", expandedMobileSections.includes(link.name) && "rotate-180")} />
+                                            </button>
+                                            <div className={cn("overflow-hidden transition-all duration-300 flex flex-col gap-1 pl-4 bg-black/5 rounded-xl", expandedMobileSections.includes(link.name) ? "max-h-screen py-2 mb-2" : "max-h-0")}>
+                                                {link.children?.map((child, idx) => (
+                                                    <Link
+                                                        key={`${child.href}-${idx}`}
+                                                        href={child.href}
+                                                        onClick={() => !child.isComingSoon && setMenuOpen(false)}
+                                                        className={cn(
+                                                            "py-2.5 px-3 text-[16px] font-medium rounded-lg",
+                                                            child.isComingSoon ? "text-stone-400" : "text-stone-700 active:bg-white"
+                                                        )}
+                                                    >
+                                                        <div className="flex justify-between items-center">
+                                                            <span>{child.name}</span>
+                                                            {child.isComingSoon && (
+                                                                <span className="text-[9px] uppercase font-bold bg-stone-100 text-stone-400 px-2 py-0.5 rounded-full">Soon</span>
+                                                            )}
+                                                        </div>
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <Link
+                                            href={link.href}
+                                            onClick={() => setMenuOpen(false)}
+                                            className="block py-3 text-[18px] font-bold text-stone-800"
+                                        >
+                                            {link.name}
+                                        </Link>
+                                    )}
+                                </div>
+                            ))}
 
-                            <div className="mt-4 pt-4 border-t border-black/10 flex flex-col gap-4">
+                            <div className="mt-4 pt-6 border-t border-black/10 flex flex-col gap-4">
                                 {user ? (
                                     <>
-                                        <div className="font-poppins text-[16px] font-medium text-stone-500">Hi, {user.name}</div>
-                                        <Link href="/account" onClick={() => setMenuOpen(false)} className="font-poppins text-[18px] font-medium text-stone-800 hover:text-[#C1572A] transition-colors">Profile</Link>
-                                        <Link href="/orders" onClick={() => setMenuOpen(false)} className="font-poppins text-[18px] font-medium text-stone-800 hover:text-[#C1572A] transition-colors">Orders</Link>
-                                        <button onClick={handleLogout} className="text-left font-poppins text-[18px] font-medium text-red-600 hover:text-red-700 transition-colors">Logout</button>
+                                        <div className="bg-white/50 p-4 rounded-2xl border border-black/5">
+                                            <p className="text-[10px] uppercase font-bold text-stone-400 mb-1">Account</p>
+                                            <p className="text-lg font-bold text-stone-800">{user.name}</p>
+                                        </div>
+                                        <Link href="/account" onClick={() => setMenuOpen(false)} className="text-[18px] font-bold text-stone-800 py-2">Profile</Link>
+                                        <Link href="/orders" onClick={() => setMenuOpen(false)} className="text-[18px] font-bold text-stone-800 py-2">Orders</Link>
+                                        <button onClick={handleLogout} className="text-left text-[18px] font-bold text-red-600 py-2 uppercase tracking-widest text-sm">Logout</button>
                                     </>
                                 ) : (
-                                    <button onClick={() => { openModal('LOGIN'); setMenuOpen(false); }} className="text-left font-poppins text-[18px] font-medium text-[#C1572A] hover:text-[#a04622] transition-colors">Login / Sign Up</button>
+                                    <button
+                                        onClick={() => { openModal('LOGIN'); setMenuOpen(false); }}
+                                        className="bg-[#C1572A] text-white py-4 rounded-xl font-bold shadow-lg shadow-[#C1572A]/20 active:scale-95 transition-transform"
+                                    >
+                                        Login / Sign Up
+                                    </button>
                                 )}
                             </div>
                         </div>
@@ -393,7 +359,7 @@ const Nav = () => {
                 onClose={() => setIsLogoutModalOpen(false)}
                 onConfirm={handleConfirmLogout}
                 title="Logout Confirmation"
-                message="Are you sure you want to logout?"
+                message="Are you sure you want to logout? You'll be missed!"
                 confirmText="Logout"
                 cancelText="Cancel"
                 variant="danger"

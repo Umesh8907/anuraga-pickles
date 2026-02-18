@@ -1,7 +1,9 @@
 'use client'
 
 import React, { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useProductsByCollection, useProducts } from '@/hooks/useProducts'
+import { useCollections } from '@/hooks/useCollections'
 import ProductCard from '@/components/features/product/ProductCard'
 import { Loader2 } from 'lucide-react'
 
@@ -10,6 +12,8 @@ interface CollectionClientProps {
 }
 
 export default function CollectionClient({ slug }: CollectionClientProps) {
+    const router = useRouter();
+    const { data: allCollections } = useCollections(); // Get all collections to map names to slugs
     const isAllProducts = slug === 'all-products';
 
     const { data: collectionProducts, isLoading: isColLoading } = useProductsByCollection(isAllProducts ? '' : slug);
@@ -18,30 +22,32 @@ export default function CollectionClient({ slug }: CollectionClientProps) {
     const isLoading = isAllProducts ? isAllLoading : isColLoading;
     const products = isAllProducts ? allProductsData?.data : collectionProducts;
 
+    console.log("CollectionClient:", { slug, isAllProducts, isLoading, productCount: products?.length });
+
     // State for filters
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [selectedPriceRange, setSelectedPriceRange] = useState<string | null>(null);
 
-    // Get available categories from products
-    const availableCategories = Array.from(new Set(
-        products?.flatMap(p => 
-            p.collections?.map((col: any) => 
-                typeof col === 'string' ? col : col.name
-            ) || []
-        ) || []
-    ));
-
-    // Filter products based on selected filters
-    const filteredProducts = products?.filter(product => {
-        // Category filter
-        if (selectedCategory && product.collections) {
-            const collectionMatch = product.collections.some((col: any) => 
-                typeof col === 'string' ? col === selectedCategory : col.name === selectedCategory
-            );
-            if (!collectionMatch) return false;
+    // Sync selectedCategory with slug
+    React.useEffect(() => {
+        if (isAllProducts) {
+            setSelectedCategory(null);
+        } else if (allCollections) {
+            const currentCollection = allCollections.find(col => col.slug === slug);
+            if (currentCollection) {
+                setSelectedCategory(currentCollection.name);
+            }
         }
-        
-        // Price range filter
+    }, [slug, allCollections, isAllProducts]);
+
+    // Get available categories from all collections, excluding 'All Products' to avoid duplication
+    const availableCategories = allCollections?.map(col => col.name).filter(name => name.toLowerCase() !== 'all products') || [];
+
+    // Filter products based on selected filters (only price filter, category selection triggers navigation)
+    const filteredProducts = products?.filter(product => {
+        // Skip category filter since category selection triggers navigation
+
+        // Price range filter only
         if (selectedPriceRange && product.variants?.length > 0) {
             const variant = product.variants[0];
             const price = variant.price;
@@ -58,13 +64,29 @@ export default function CollectionClient({ slug }: CollectionClientProps) {
                     return true;
             }
         }
-        
+
         return true;
     }) || [];
 
     // Helper functions for filter updates
     const handleCategoryChange = (category: string) => {
-        setSelectedCategory(category === "all" ? null : category);
+        if (category === "all") {
+            router.push('/collections/all-products');
+        } else {
+            // Find the actual collection object that matches this category name
+            const matchedCollection = allCollections?.find(col =>
+                col.name.toLowerCase() === category.toLowerCase() ||
+                col.name.toLowerCase().replace(/\s+/g, '-') === category.toLowerCase()
+            );
+
+            if (matchedCollection) {
+                router.push(`/collections/${matchedCollection.slug}`);
+            } else {
+                // Fallback: try to convert category name to slug format
+                const categorySlug = category.toLowerCase().replace(/\s+/g, '-');
+                router.push(`/collections/${categorySlug}`);
+            }
+        }
     };
 
     const handlePriceRangeChange = (price: string | null) => {
@@ -95,13 +117,13 @@ export default function CollectionClient({ slug }: CollectionClientProps) {
                 <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4 md:hidden">
                     {/* Category Select */}
                     <div>
-                        <label className="block text-sm font-semibold mb-1 text-stone-800">
+                        <label className="block text-sm font-semibold mb-1 text-stone-800 font-poppins">
                             Category
                         </label>
                         <select
                             value={selectedCategory ?? "all"}
                             onChange={(e) => handleCategoryChange(e.target.value)}
-                            className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-700 bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                            className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm font-poppins text-stone-700 bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 font-poppins"
                         >
                             <option value="all">All Products</option>
                             {availableCategories.map((cat) => (
@@ -114,13 +136,13 @@ export default function CollectionClient({ slug }: CollectionClientProps) {
 
                     {/* Price Select */}
                     <div>
-                        <label className="block text-sm font-semibold mb-1 text-stone-800">
+                        <label className="block text-sm font-semibold mb-1 text-stone-800 font-poppins">
                             Price Range
                         </label>
                         <select
                             value={selectedPriceRange ?? "all"}
                             onChange={(e) => handlePriceRangeChange(e.target.value)}
-                            className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-700 bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                            className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm font-poppins text-stone-700 bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 font-poppins"
                         >
                             <option value="all">All Prices</option>
                             <option value="0-200">₹0 - ₹200</option>
@@ -138,7 +160,7 @@ export default function CollectionClient({ slug }: CollectionClientProps) {
                         <div className="rounded-2xl border bg-white p-5 shadow-sm h-fit">
                             {/* CATEGORY CHECKBOX */}
                             <div className="mb-6">
-                                <h3 className="text-sm font-semibold mb-3 text-stone-800">
+                                <h3 className="text-sm font-semibold mb-3 text-stone-800 font-poppins">
                                     Categories
                                 </h3>
                                 <div className="space-y-2">
@@ -170,11 +192,11 @@ export default function CollectionClient({ slug }: CollectionClientProps) {
 
                             {/* PRICE CHECKBOX */}
                             <div className="mb-6">
-                                <h3 className="text-sm font-semibold mb-3 text-stone-800">
+                                <h3 className="text-sm font-semibold mb-3 text-stone-800 font-poppins">
                                     Price Range
                                 </h3>
                                 <div className="space-y-2">
-                                    <label className="flex items-center gap-2 text-sm cursor-pointer text-stone-700">
+                                    <label className="flex items-center gap-2 text-sm  cursor-pointer text-stone-700">
                                         <input
                                             type="checkbox"
                                             checked={!selectedPriceRange}
@@ -224,12 +246,12 @@ export default function CollectionClient({ slug }: CollectionClientProps) {
 
                             {/* RECENT VIEWED */}
                             <div>
-                                <h3 className="text-sm font-semibold mb-3 text-stone-800">
+                                <h3 className="text-sm font-semibold mb-3 text-stone-800 font-poppins">
                                     Recent Viewed
                                 </h3>
                                 <div className="space-y-4">
                                     {filteredProducts.slice(0, 3).map((product) => (
-                                        <div 
+                                        <div
                                             key={product._id}
                                             className="flex gap-3 rounded-lg border border-stone-200 p-2 hover:bg-stone-50 transition cursor-pointer"
                                         >
