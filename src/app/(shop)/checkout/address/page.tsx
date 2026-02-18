@@ -153,7 +153,7 @@ export default function AddressPage() {
                                                 >
                                                     Remove
                                                 </button>
-                                                <div className="w-[1px] h-3 bg-stone-300" />
+                                                <div className="w-px h-3 bg-stone-300" />
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); handleEdit(address._id); }}
                                                     className="text-xs font-bold text-stone-500 hover:text-stone-900 hover:underline uppercase"
@@ -190,7 +190,7 @@ export default function AddressPage() {
                             <ul className="space-y-4">
                                 {cart?.items.map(item => (
                                     <li key={item._id} className="flex gap-4">
-                                        <div className="w-12 h-16 bg-stone-50 rounded-sm overflow-hidden flex-shrink-0 border border-stone-100">
+                                        <div className="w-12 h-16 bg-stone-50 rounded-sm overflow-hidden shrink-0 border border-stone-100">
                                             <img src={item.product?.images?.[0] || 'https://placehold.co/100'} className="w-full h-full object-cover" alt="" />
                                         </div>
                                         <div className="text-sm">

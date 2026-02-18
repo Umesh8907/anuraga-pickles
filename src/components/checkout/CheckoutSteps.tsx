@@ -40,7 +40,7 @@ export default function CheckoutSteps() {
             <div className="max-w-2xl mx-auto px-4">
                 <div className="flex items-center justify-between relative">
                     {/* Progress Bar Background */}
-                    <div className="absolute top-1/2 left-0 w-full h-[1px] bg-stone-200 -z-10" />
+                    <div className="absolute top-1/2 left-0 w-full h-px bg-stone-200 -z-10" />
 
                     {steps.map((step, index) => {
                         const isCompleted = index < currentStepIndex;

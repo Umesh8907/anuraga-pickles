@@ -19,7 +19,7 @@ export default function NotFound() {
                             e.currentTarget.src = 'https://images.unsplash.com/photo-1599940824399-b87987ceb72a?q=80&w=1000&auto=format&fit=crop'
                         }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-stone-900/60 to-transparent flex items-end p-8">
+                    <div className="absolute inset-0 bg-linear-to-t from-stone-900/60 to-transparent flex items-end p-8">
                         <p className="text-white text-sm font-medium italic">"A meal without spice is like a page without content."</p>
                     </div>
                 </div>

@@ -83,13 +83,13 @@ export default function Navbar() {
 
     return (
         <>
-            <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-stone-200">
+            <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-stone-200">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-20">
+                    <div className="flex justify-between items-center h-24">
                         {/* Logo */}
-                        <div className="flex-shrink-0 flex items-center">
+                        <div className="shrink-0 flex items-center">
                             <Link href="/" className="flex items-center gap-3 group">
-                                <div className="relative h-28 w-28 transition-transform duration-500 group-hover:scale-110">
+                                <div className="relative h-32 w-32 transition-transform duration-500 group-hover:scale-110">
                                     <Image
                                         src="/logo.png"
                                         alt="Anuraga Logo"
@@ -98,10 +98,7 @@ export default function Navbar() {
                                         priority
                                     />
                                 </div>
-                                <div className="flex flex-col">
-                                    <span className="text-xl font-black text-brand-teal tracking-tighter leading-none">ANURAGA</span>
-                                    <span className="text-[10px] font-bold text-brand-amber tracking-[0.2em] uppercase leading-none mt-1">Taste of Love</span>
-                                </div>
+
                             </Link>
                         </div>
 

@@ -90,11 +90,11 @@ export default function CartPage() {
                             </div>
                             <ul className="space-y-3 text-sm text-stone-600 pl-1">
                                 <li className="flex items-start gap-3">
-                                    <span className="mt-2 w-1.5 h-1.5 bg-stone-300 rounded-full flex-shrink-0" />
+                                    <span className="mt-2 w-1.5 h-1.5 bg-stone-300 rounded-full shrink-0" />
                                     <span className="leading-relaxed">10% Instant Discount on Canara Bank Credit Card on min spend of ₹3,500</span>
                                 </li>
                                 <li className="flex items-start gap-3">
-                                    <span className="mt-2 w-1.5 h-1.5 bg-stone-300 rounded-full flex-shrink-0" />
+                                    <span className="mt-2 w-1.5 h-1.5 bg-stone-300 rounded-full shrink-0" />
                                     <span className="leading-relaxed">5% Unlimited Cashback on Flipkart Axis Bank Credit Card</span>
                                 </li>
                             </ul>
@@ -116,7 +116,7 @@ export default function CartPage() {
 
                                     <div className="flex gap-6">
                                         {/* Image */}
-                                        <div className="flex-shrink-0 w-32 h-32 bg-stone-50 rounded-sm overflow-hidden">
+                                        <div className="shrink-0 w-32 h-32 bg-stone-50 rounded-sm overflow-hidden">
                                             <img
                                                 src={item.product?.images?.[0] || 'https://placehold.co/150x200?text=No+Image'}
                                                 alt={item.product?.name || 'Product'}
