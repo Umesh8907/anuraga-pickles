@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { Trash2, Plus, Minus, ArrowRight, ShoppingCart, MapPin, Tag, Gift, Heart, ChevronDown, Check } from 'lucide-react'
-import { useCart, useRemoveFromCart, useUpdateCartItem } from '@/hooks/useCart'
+import { useCart, useRemoveFromCart, useUpdateCartItem, useUpdateCartItemVariant } from '@/hooks/useCart'
 import { cn } from '@/lib/utils'
 import { useUser } from '@/hooks/useAuth'
 import { useAuthModalStore } from '@/store/useAuthModalStore'
@@ -15,6 +15,7 @@ export default function CartPage() {
     const { data: cartData, isLoading } = useCart();
     const { mutate: removeFromCart } = useRemoveFromCart();
     const { mutate: updateCartItem } = useUpdateCartItem();
+    const { mutate: updateCartItemVariant } = useUpdateCartItemVariant();
     const { data: user } = useUser();
     const { addresses } = useAddress();
     const { openModal } = useAuthModalStore();
@@ -151,23 +152,28 @@ export default function CartPage() {
                                                     </div>
                                                 </div>
 
-                                                {/* Size Selector (Mock) */}
+                                                {/* Size Selector */}
                                                 <div className="flex items-center gap-3">
                                                     <span className="text-xs font-bold text-stone-500 bg-stone-100 px-2 py-1 rounded">Size</span>
-                                                    <div className="flex gap-2">
-                                                        {['200g', '500g', '1kg'].map(size => (
-                                                            <button
-                                                                key={size}
-                                                                className={cn(
-                                                                    "px-3 py-1 rounded-full border text-xs font-medium transition-colors",
-                                                                    item.variantLabel?.includes(size) || (size === '500g')
-                                                                        ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                                                                        : "border-stone-200 text-stone-600 hover:border-stone-300"
-                                                                )}
-                                                            >
-                                                                {size}
-                                                            </button>
-                                                        ))}
+                                                    <div className="relative">
+                                                        <select
+                                                            value={item.variantId}
+                                                            onChange={(e) => updateCartItemVariant({ itemId: item._id, newVariantId: e.target.value })}
+                                                            className="appearance-none pl-3 pr-8 py-1 rounded-full border border-stone-200 bg-white text-xs font-medium text-stone-700 hover:border-emerald-500 focus:outline-none focus:border-emerald-500 transition-colors cursor-pointer"
+                                                        >
+                                                            {item.product?.variants?.map((variant) => (
+                                                                <option
+                                                                    key={variant._id}
+                                                                    value={variant._id}
+                                                                    disabled={variant.stock <= 0 && variant._id !== item.variantId}
+                                                                >
+                                                                    {variant.label} {variant.stock <= 0 && '(Out of Stock)'}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-stone-500">
+                                                            <ChevronDown className="h-3 w-3" />
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>

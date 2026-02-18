@@ -66,3 +66,22 @@ export const useUpdateCartItem = () => {
         }
     });
 };
+
+export const useUpdateCartItemVariant = () => {
+    const queryClient = useQueryClient();
+    const { data: user } = useUser();
+
+    return useMutation({
+        mutationFn: ({ itemId, newVariantId }: { itemId: string; newVariantId: string }) =>
+            user
+                ? cartService.updateCartItemVariant(itemId, newVariantId)
+                : guestCartService.updateCartItemVariant(itemId, newVariantId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['cart'] });
+            toast.success('Cart updated');
+        },
+        onError: () => {
+            toast.error('Failed to update cart');
+        }
+    });
+};

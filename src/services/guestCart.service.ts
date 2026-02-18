@@ -60,15 +60,57 @@ const guestCartService = {
         return cart;
     },
 
-    async updateCartItem(cartItemId: string, quantity: number): Promise<Cart> {
+    async updateCartItem(itemId: string, quantity: number): Promise<Cart> {
         const cart = getGuestCart();
-        const item = cart.items.find(i => i._id === cartItemId);
+        const item = cart.items.find(i => i._id === itemId);
         if (item) {
             const variant = item.product.variants.find(v => v._id === item.variantId);
             if (variant) {
+                // Ensure we don't exceed stock
                 item.quantity = Math.min(quantity, variant.stock);
             }
         }
+        saveGuestCart(cart);
+        return cart;
+    },
+
+    async updateCartItemVariant(itemId: string, newVariantId: string): Promise<Cart> {
+        const cart = getGuestCart();
+        const itemIndex = cart.items.findIndex(i => i._id === itemId);
+        if (itemIndex === -1) return cart;
+
+        const item = cart.items[itemIndex];
+        const product = item.product;
+        // In local mock, product object is nested.
+        // We need to find the variant in the product object.
+        // For guest cart, the product object is stored in the item.
+        const newVariant = product.variants.find(v => v._id === newVariantId);
+        if (!newVariant) return cart;
+
+        // Check if target variant already exists
+        const existingTargetIndex = cart.items.findIndex(
+            i => i.product._id === product._id &&
+                i.variantId === newVariantId &&
+                i._id !== itemId
+        );
+
+        if (existingTargetIndex > -1) {
+            // MERGE
+            const targetItem = cart.items[existingTargetIndex];
+            const newQuantity = targetItem.quantity + item.quantity;
+            targetItem.quantity = Math.min(newQuantity, newVariant.stock);
+            cart.items.splice(itemIndex, 1);
+        } else {
+            // UPDATE
+            item.variantId = newVariant._id;
+            item.variantLabel = newVariant.label;
+            item.price = newVariant.price;
+            // Re-check stock constraint for new variant
+            if (item.quantity > newVariant.stock) {
+                item.quantity = newVariant.stock;
+            }
+        }
+
         saveGuestCart(cart);
         return cart;
     },

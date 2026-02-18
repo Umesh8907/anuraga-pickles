@@ -21,8 +21,13 @@ const cartService = {
         return response.data.data;
     },
 
-    async updateCartItem(cartItemId: string, quantity: number): Promise<Cart> {
-        const response = await api.put<{ success: boolean; data: Cart }>(`/cart/${cartItemId}`, { quantity });
+    async updateCartItem(itemId: string, quantity: number): Promise<Cart> {
+        const response = await api.put<{ success: boolean; data: Cart }>(`/cart/${itemId}`, { quantity });
+        return response.data.data;
+    },
+
+    async updateCartItemVariant(itemId: string, newVariantId: string): Promise<Cart> {
+        const response = await api.put<{ success: boolean; data: Cart }>(`/cart/${itemId}/variant`, { newVariantId });
         return response.data.data;
     },
 
