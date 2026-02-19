@@ -3,6 +3,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useState } from 'react'
 import CartSync from './features/cart/CartSync'
+import { SocketProvider } from '@/providers/SocketProvider'
 
 export default function Providers({ children }: { children: React.ReactNode }) {
     const [queryClient] = useState(() => new QueryClient({
@@ -17,8 +18,10 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
     return (
         <QueryClientProvider client={queryClient}>
-            <CartSync />
-            {children}
+            <SocketProvider>
+                <CartSync />
+                {children}
+            </SocketProvider>
         </QueryClientProvider>
     )
 }

@@ -10,6 +10,7 @@ import { useUser, useLogout } from '@/hooks/useAuth'
 import { useAuthModalStore } from '@/store/useAuthModalStore'
 import { useCollections } from '@/hooks/useCollections'
 import ConfirmationModal from '@/components/ui/ConfirmationModal'
+import NotificationBell from '@/components/features/notifications/NotificationBell'
 
 export default function Navbar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -164,6 +165,8 @@ export default function Navbar() {
                             <button className="text-stone-600 hover:text-brand-teal transition-colors p-1">
                                 <Search className="w-5 h-5" />
                             </button>
+
+                            <NotificationBell />
 
                             <Link href="/wishlist" className="text-stone-600 hover:text-red-500 transition-colors p-1 relative group">
                                 <Heart className="w-5 h-5 group-hover:fill-current" />
