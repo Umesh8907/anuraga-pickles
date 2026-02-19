@@ -23,9 +23,17 @@ export interface User {
 export interface ProductVariant {
     _id: string;
     label: string;
+    type: 'SIZE' | 'COMBO';
+    unit?: string;
     price: number;
     mrp: number;
+    discount: number;
     stock: number;
+    realStock: number;
+    inStock: number;
+    assigned: number;
+    ordered: number;
+    pricePer100g?: number;
     isDefault: boolean;
 }
 
@@ -48,6 +56,28 @@ export interface Product {
     isActive: boolean;
     averageRating: number;
     reviewCount: number;
+
+    // New fields
+    type?: string;
+    brand?: string;
+    flavor?: string;
+    itemForm?: string;
+    ingredients?: string;
+    nutritionInformation?: string;
+    packagingType?: string;
+    storageInstruction?: string;
+    dietaryPreference?: string;
+    canReturn?: boolean;
+    availableLocations?: string[];
+    tags?: string[];
+
+    keyBenefits?: { title: string; icon: string }[];
+    keyIngredients?: { name: string; image: string; description: string }[];
+    expertBadges?: string[];
+    relatedProducts?: Product[] | string[]; // Populated or ID ref
+    frequentlyBoughtTogether?: Product[] | string[];
+
+
     collections?: any[]; // Populated collections
     createdAt: string;
 }
