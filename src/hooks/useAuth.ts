@@ -33,7 +33,7 @@ export const useLogin = () => {
 export const useRegister = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (data: { phone: string; password: string; name: string; role?: string }) => authService.register(data),
+        mutationFn: (data: { phone: string; email: string; password: string; name: string; role?: string }) => authService.register(data),
         onSuccess: (data) => {
             localStorage.setItem('accessToken', data.accessToken);
             localStorage.setItem('refreshToken', data.refreshToken);

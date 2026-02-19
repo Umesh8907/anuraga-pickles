@@ -7,7 +7,7 @@ const authService = {
         return response.data.data;
     },
 
-    async register(data: { phone: string; password: string; name: string; role?: string }): Promise<AuthResponse> {
+    async register(data: { phone: string; email: string; password: string; name: string; role?: string }): Promise<AuthResponse> {
         const response = await api.post<{ success: boolean; data: AuthResponse }>('/auth/register', data);
         return response.data.data;
     },

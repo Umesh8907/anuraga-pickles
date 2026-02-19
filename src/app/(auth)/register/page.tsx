@@ -3,15 +3,20 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Phone, Lock, User, ArrowRight, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { Phone, Lock, User, ArrowRight, Loader2, AlertCircle, CheckCircle2, Mail, Eye, EyeOff } from 'lucide-react'
 import { useRegister } from '@/hooks/useAuth'
 
 export default function RegisterPage() {
     const router = useRouter();
     const [name, setName] = useState('')
     const [phone, setPhone] = useState('')
+    const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [confirmPassword, setConfirmPassword] = useState('')
     const [errorMessage, setErrorMessage] = useState('')
+
+    const [showPassword, setShowPassword] = useState(false)
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
     const { mutate: register, isPending } = useRegister();
 
@@ -19,8 +24,13 @@ export default function RegisterPage() {
         e.preventDefault()
         setErrorMessage('')
 
-        if (!name || !phone || !password) {
+        if (!name || !phone || !email || !password || !confirmPassword) {
             setErrorMessage('All fields are required');
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            setErrorMessage('Passwords do not match');
             return;
         }
 
@@ -29,14 +39,21 @@ export default function RegisterPage() {
             return;
         }
 
+        // Basic email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            setErrorMessage('Please enter a valid email address');
+            return;
+        }
+
         register(
-            { name, phone, password },
+            { name, phone, email, password },
             {
                 onSuccess: () => {
                     router.push('/(dashboard)/account');
                 },
                 onError: (error: any) => {
-                    setErrorMessage(error?.response?.data?.message || 'Registration failed. This phone may already be registered.');
+                    setErrorMessage(error?.response?.data?.message || 'Registration failed. This phone or email may already be registered.');
                 }
             }
         );
@@ -54,7 +71,7 @@ export default function RegisterPage() {
 
                 {errorMessage && (
                     <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center gap-3 text-sm not-italic">
-                        <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                        <AlertCircle className="w-5 h-5 shrink-0" />
                         <p>{errorMessage}</p>
                     </div>
                 )}
@@ -78,6 +95,27 @@ export default function RegisterPage() {
                                     onChange={(e) => setName(e.target.value)}
                                     className="block w-full pl-11 pr-4 py-3 border border-stone-200 rounded-xl text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all font-medium"
                                     placeholder="Anuraga Pickles"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label htmlFor="email" className="block text-sm font-bold text-stone-700 mb-2 ml-1">
+                                Email Address
+                            </label>
+                            <div className="relative group">
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-stone-400 group-focus-within:text-amber-600 transition-colors">
+                                    <Mail className="h-5 w-5" />
+                                </div>
+                                <input
+                                    id="email"
+                                    name="email"
+                                    type="email"
+                                    required
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="block w-full pl-11 pr-4 py-3 border border-stone-200 rounded-xl text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all font-medium"
+                                    placeholder="hello@anuragapickles.com"
                                 />
                             </div>
                         </div>
@@ -114,20 +152,55 @@ export default function RegisterPage() {
                                 <input
                                     id="password"
                                     name="password"
-                                    type="password"
+                                    type={showPassword ? 'text' : 'password'}
                                     required
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="block w-full pl-11 pr-4 py-3 border border-stone-200 rounded-xl text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all font-medium"
+                                    className="block w-full pl-11 pr-11 py-3 border border-stone-200 rounded-xl text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all font-medium"
                                     placeholder="Create a strong password"
                                 />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-stone-400 hover:text-stone-600 transition-colors"
+                                >
+                                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label htmlFor="confirmPassword" className="block text-sm font-bold text-stone-700 mb-2 ml-1">
+                                Confirm Password
+                            </label>
+                            <div className="relative group">
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-stone-400 group-focus-within:text-amber-600 transition-colors">
+                                    <Lock className="h-5 w-5" />
+                                </div>
+                                <input
+                                    id="confirmPassword"
+                                    name="confirmPassword"
+                                    type={showConfirmPassword ? 'text' : 'password'}
+                                    required
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    className="block w-full pl-11 pr-11 py-3 border border-stone-200 rounded-xl text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all font-medium"
+                                    placeholder="Confirm your password"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-stone-400 hover:text-stone-600 transition-colors"
+                                >
+                                    {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                </button>
                             </div>
                         </div>
                     </div>
 
                     <div className="space-y-4">
                         <div className="flex items-start gap-2 text-xs text-stone-500 bg-stone-50 p-4 rounded-xl border border-stone-100 italic">
-                            <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                            <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
                             <span>By signing up, you agree to receive order notifications and updates on WhatsApp.</span>
                         </div>
 

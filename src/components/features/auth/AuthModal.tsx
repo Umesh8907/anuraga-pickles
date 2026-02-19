@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { X, Phone, Lock, User, ArrowRight, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { X, Phone, Lock, User, ArrowRight, Loader2, AlertCircle, CheckCircle2, Mail, Eye, EyeOff } from 'lucide-react'
 import Image from 'next/image'
 import { useLogin, useRegister } from '@/hooks/useAuth'
 import { useAuthModalStore } from '@/store/useAuthModalStore'
@@ -18,8 +18,14 @@ export default function AuthModal() {
     // Register State
     const [regName, setRegName] = useState('')
     const [regPhone, setRegPhone] = useState('')
+    const [regEmail, setRegEmail] = useState('')
     const [regPassword, setRegPassword] = useState('')
+    const [regConfirmPassword, setRegConfirmPassword] = useState('')
     const [regError, setRegError] = useState('')
+
+    const [showLoginPassword, setShowLoginPassword] = useState(false)
+    const [showRegPassword, setShowRegPassword] = useState(false)
+    const [showRegConfirmPassword, setShowRegConfirmPassword] = useState(false)
 
     const { mutate: login, isPending: isLoginPending } = useLogin();
     const { mutate: register, isPending: isRegPending } = useRegister();
@@ -38,14 +44,20 @@ export default function AuthModal() {
     const handleRegister = (e: React.FormEvent) => {
         e.preventDefault()
         setRegError('')
-        register({ name: regName, phone: regPhone, password: regPassword, role: 'USER' }, {
+
+        if (regPassword !== regConfirmPassword) {
+            setRegError('Passwords do not match')
+            return
+        }
+
+        register({ name: regName, phone: regPhone, email: regEmail, password: regPassword, role: 'USER' }, {
             onSuccess: () => closeModal(),
             onError: (err: any) => setRegError(err?.response?.data?.message || 'Registration failed')
         })
     }
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 italic">
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 sm:p-6 italic">
             {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-stone-900/60 backdrop-blur-sm transition-opacity"
@@ -105,13 +117,20 @@ export default function AuthModal() {
                                             <Lock className="h-4 w-4" />
                                         </div>
                                         <input
-                                            type="password"
+                                            type={showLoginPassword ? 'text' : 'password'}
                                             required
                                             value={loginPassword}
                                             onChange={(e) => setLoginPassword(e.target.value)}
-                                            className="block w-full pl-11 pr-4 py-3 border border-stone-200 rounded-xl text-stone-900 text-sm focus:ring-2 focus:ring-brand-teal outline-none transition-all"
+                                            className="block w-full pl-11 pr-11 py-3 border border-stone-200 rounded-xl text-stone-900 text-sm focus:ring-2 focus:ring-brand-teal outline-none transition-all"
                                             placeholder="Password"
                                         />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowLoginPassword(!showLoginPassword)}
+                                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-stone-400 hover:text-stone-600 transition-colors"
+                                        >
+                                            {showLoginPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                        </button>
                                     </div>
                                 </div>
 
@@ -180,19 +199,59 @@ export default function AuthModal() {
                                     </div>
                                     <div className="relative group">
                                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-stone-400 group-focus-within:text-brand-teal">
+                                            <Mail className="h-4 w-4" />
+                                        </div>
+                                        <input
+                                            type="email"
+                                            required
+                                            value={regEmail}
+                                            onChange={(e) => setRegEmail(e.target.value)}
+                                            className="block w-full pl-11 pr-4 py-3 border border-stone-200 rounded-xl text-stone-900 text-sm focus:ring-2 focus:ring-brand-teal outline-none transition-all"
+                                            placeholder="Email Address"
+                                        />
+                                    </div>
+                                    <div className="relative group">
+                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-stone-400 group-focus-within:text-brand-teal">
                                             <Lock className="h-4 w-4" />
                                         </div>
                                         <input
-                                            type="password"
+                                            type={showRegPassword ? 'text' : 'password'}
                                             required
                                             value={regPassword}
                                             onChange={(e) => setRegPassword(e.target.value)}
-                                            className="block w-full pl-11 pr-4 py-3 border border-stone-200 rounded-xl text-stone-900 text-sm focus:ring-2 focus:ring-amber-500 outline-none transition-all"
+                                            className="block w-full pl-11 pr-11 py-3 border border-stone-200 rounded-xl text-stone-900 text-sm focus:ring-2 focus:ring-amber-500 outline-none transition-all"
                                             placeholder="Set Password"
                                         />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowRegPassword(!showRegPassword)}
+                                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-stone-400 hover:text-stone-600 transition-colors"
+                                        >
+                                            {showRegPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                        </button>
+                                    </div>
+                                    <div className="relative group">
+                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-stone-400 group-focus-within:text-brand-teal">
+                                            <Lock className="h-4 w-4" />
+                                        </div>
+                                        <input
+                                            type={showRegConfirmPassword ? 'text' : 'password'}
+                                            required
+                                            value={regConfirmPassword}
+                                            onChange={(e) => setRegConfirmPassword(e.target.value)}
+                                            className="block w-full pl-11 pr-11 py-3 border border-stone-200 rounded-xl text-stone-900 text-sm focus:ring-2 focus:ring-amber-500 outline-none transition-all"
+                                            placeholder="Confirm Password"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowRegConfirmPassword(!showRegConfirmPassword)}
+                                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-stone-400 hover:text-stone-600 transition-colors"
+                                        >
+                                            {showRegConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                        </button>
                                     </div>
                                     <div className="flex items-start gap-2 bg-stone-50 p-3 rounded-lg text-[10px] text-stone-500 italic">
-                                        <CheckCircle2 className="w-3 h-3 text-green-600 mt-0.5 flex-shrink-0" />
+                                        <CheckCircle2 className="w-3 h-3 text-green-600 mt-0.5 shrink-0" />
                                         Sign up to get 10% off on your first order.
                                     </div>
                                 </div>
