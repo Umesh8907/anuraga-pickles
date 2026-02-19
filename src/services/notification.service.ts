@@ -1,6 +1,8 @@
 import axios from 'axios'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api'
+// Sanitize API_URL: remove trailing slash if present
+const RAW_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+const API_URL = RAW_API_URL.replace(/\/$/, "");
 
 // We need to send the token. Assuming axios interceptor handles it OR we manually add it.
 // Looking at other services would confirm, but usually there's an api instance.

@@ -36,7 +36,11 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
         // Initialize Socket
         // Use environment variable for URL if available, else standard localhost
-        const socketUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+        // IMPORTANT: Socket.io usually connects to root. If API_URL has /api, we should strip it or use root.
+        let socketUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+
+        // Remove '/api' from the end if present to connect to root namespace
+        socketUrl = socketUrl.replace(/\/api\/?$/, '');
 
         // We need to get the token. Since useUser uses a query, we might need to get token from storage 
         // or ensure the user object has it. usually auth persistence is in localStorage/cookies.
@@ -71,7 +75,14 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
         // Global Notification Listener
         socketInstance.on('notification', (data: any) => {
-            // Play sound?
+            // Play sound
+            try {
+                const notificationSound = new Audio('/sounds/notification.mp3');
+                notificationSound.play().catch(e => console.log('Audio play failed', e));
+            } catch (error) {
+                console.error("Error playing sound", error);
+            }
+
             // Show Toast
             toast(data.title, {
                 description: data.message,
