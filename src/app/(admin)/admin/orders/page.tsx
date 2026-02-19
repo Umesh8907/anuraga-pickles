@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import {
     Search,
     Filter,
@@ -18,11 +18,20 @@ import {
 } from 'lucide-react'
 import { useAllOrders, useUpdateOrderStatus } from '@/hooks/useAdmin'
 import { cn } from '@/lib/utils'
+import ConfirmationModal from '@/components/ui/ConfirmationModal'
 
 export default function AdminOrders() {
     const [search, setSearch] = useState('')
     const { data: orders, isLoading, isError } = useAllOrders()
     const { mutate: updateStatus, isPending } = useUpdateOrderStatus()
+
+    const [openOrderId, setOpenOrderId] = useState<string | null>(null);
+    const [confirmModal, setConfirmModal] = useState<{ isOpen: boolean; orderId: string; status: string }>({
+        isOpen: false,
+        orderId: '',
+        status: ''
+    });
+    const menuRef = useRef<HTMLDivElement>(null);
 
     const filteredOrders = orders?.filter((o: any) =>
         o._id.toLowerCase().includes(search.toLowerCase()) ||
@@ -30,10 +39,26 @@ export default function AdminOrders() {
     )
 
     const handleStatusUpdate = (orderId: string, status: string) => {
-        if (window.confirm(`Update order status to ${status}?`)) {
-            updateStatus({ orderId, status })
-        }
+        setConfirmModal({ isOpen: true, orderId, status });
+        setOpenOrderId(null);
     }
+
+    const confirmStatusUpdate = () => {
+        updateStatus({ orderId: confirmModal.orderId, status: confirmModal.status });
+        setConfirmModal({ ...confirmModal, isOpen: false });
+    }
+
+    // Close menu on outside click
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setOpenOrderId(null);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     if (isLoading) return (
         <div className="flex items-center justify-center min-h-[60vh]">
@@ -130,43 +155,53 @@ export default function AdminOrders() {
                                             </span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-right relative">
-                                        <div className="relative inline-block group/menu">
-                                            <button className="p-2 text-stone-400 hover:text-amber-600 transition-colors rounded-lg bg-stone-50 border border-stone-100">
+                                    <td className="px-6 py-4 text-right">
+                                        <div className="relative inline-block" ref={order._id === openOrderId ? menuRef : null}>
+                                            <button
+                                                onClick={() => setOpenOrderId(openOrderId === order._id ? null : order._id)}
+                                                className={cn(
+                                                    "p-2 transition-colors rounded-lg border",
+                                                    openOrderId === order._id
+                                                        ? "text-amber-600 bg-amber-50 border-amber-200"
+                                                        : "text-stone-400 hover:text-amber-600 bg-stone-50 border-stone-100"
+                                                )}
+                                            >
                                                 <MoreVertical className="w-4 h-4" />
                                             </button>
 
-                                            <div className="absolute right-0 top-1/2 -translate-y-1/2 mr-12 bg-white border border-stone-100 rounded-xl shadow-xl py-2 w-48 z-10 hidden group-hover/menu:block animate-in fade-in scale-in-95 duration-200">
-                                                <button
-                                                    onClick={() => handleStatusUpdate(order._id, 'CONFIRMED')}
-                                                    className="w-full text-left px-4 py-2 text-[10px] font-black text-stone-600 hover:bg-stone-50 flex items-center gap-2 uppercase tracking-widest"
-                                                >
-                                                    <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                                                    Confirm Order
-                                                </button>
-                                                <button
-                                                    onClick={() => handleStatusUpdate(order._id, 'SHIPPED')}
-                                                    className="w-full text-left px-4 py-2 text-[10px] font-black text-stone-600 hover:bg-stone-50 flex items-center gap-2 uppercase tracking-widest"
-                                                >
-                                                    <Truck className="w-3 h-3 text-blue-500" />
-                                                    Mark Shipped
-                                                </button>
-                                                <button
-                                                    onClick={() => handleStatusUpdate(order._id, 'DELIVERED')}
-                                                    className="w-full text-left px-4 py-2 text-[10px] font-black text-stone-600 hover:bg-stone-50 flex items-center gap-2 uppercase tracking-widest"
-                                                >
-                                                    <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                                                    Mark delivered
-                                                </button>
-                                                <div className="h-px bg-stone-100 my-1 mx-2" />
-                                                <button
-                                                    onClick={() => handleStatusUpdate(order._id, 'CANCELLED')}
-                                                    className="w-full text-left px-4 py-2 text-[10px] font-black text-red-500 hover:bg-red-50 flex items-center gap-2 uppercase tracking-widest"
-                                                >
-                                                    <XCircle className="w-3 h-3" />
-                                                    Cancel order
-                                                </button>
-                                            </div>
+                                            {openOrderId === order._id && (
+                                                <div className="absolute right-0 top-full mt-2 bg-white border border-stone-100 rounded-xl shadow-xl py-2 w-48 z-50 animate-in fade-in zoom-in-95 duration-200">
+                                                    <button
+                                                        onClick={() => handleStatusUpdate(order._id, 'CONFIRMED')}
+                                                        className="w-full text-left px-4 py-2 text-[10px] font-black text-stone-600 hover:bg-stone-50 flex items-center gap-2 uppercase tracking-widest"
+                                                    >
+                                                        <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                                                        Confirm Order
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleStatusUpdate(order._id, 'SHIPPED')}
+                                                        className="w-full text-left px-4 py-2 text-[10px] font-black text-stone-600 hover:bg-stone-50 flex items-center gap-2 uppercase tracking-widest"
+                                                    >
+                                                        <Truck className="w-3 h-3 text-blue-500" />
+                                                        Mark Shipped
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleStatusUpdate(order._id, 'DELIVERED')}
+                                                        className="w-full text-left px-4 py-2 text-[10px] font-black text-stone-600 hover:bg-stone-50 flex items-center gap-2 uppercase tracking-widest"
+                                                    >
+                                                        <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                                                        Mark delivered
+                                                    </button>
+                                                    <div className="h-px bg-stone-100 my-1 mx-2" />
+                                                    <button
+                                                        onClick={() => handleStatusUpdate(order._id, 'CANCELLED')}
+                                                        className="w-full text-left px-4 py-2 text-[10px] font-black text-red-500 hover:bg-red-50 flex items-center gap-2 uppercase tracking-widest"
+                                                    >
+                                                        <XCircle className="w-3 h-3" />
+                                                        Cancel order
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>
@@ -184,6 +219,16 @@ export default function AdminOrders() {
                     </div>
                 )}
             </div>
+            {/* Confirmation Modal */}
+            <ConfirmationModal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+                onConfirm={confirmStatusUpdate}
+                title="Update Order Status"
+                message={`Are you sure you want to update the order status to ${confirmModal.status}?`}
+                confirmText="Update Status"
+                variant={confirmModal.status === 'CANCELLED' ? 'danger' : 'warning'}
+            />
         </div>
     )
 }

@@ -76,14 +76,21 @@ export const useAllOrders = () => {
     });
 };
 
+import { toast } from 'sonner';
+
 export const useUpdateOrderStatus = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: ({ orderId, status }: { orderId: string; status: string }) =>
             adminService.updateOrderStatus(orderId, status),
-        onSuccess: () => {
+        onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
             queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
+            toast.success(`Order status updated to ${variables.status}`);
+        },
+        onError: (error: any) => {
+            const message = error.response?.data?.message || error.message || 'Failed to update order status';
+            toast.error(message);
         },
     });
 };
