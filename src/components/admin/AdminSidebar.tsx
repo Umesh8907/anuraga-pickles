@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAdminUser, useAdminLogout } from '@/hooks/useAdminAuth';
+import { useAdminStats } from '@/hooks/useAdmin';
 
 const adminNavItems = [
     { label: 'Dashboard', icon: LayoutDashboard, href: '/admin/dashboard' },
@@ -28,6 +29,14 @@ export default function AdminSidebar() {
     const pathname = usePathname()
     const { data: user } = useAdminUser();
     const { mutate: logout } = useAdminLogout();
+    const { data: stats } = useAdminStats();
+
+    const pendingCount = stats?.orderStatusBreakdown?.find(s => s._id === 'PENDING')?.count || 0;
+
+    const navItems = adminNavItems.map(item => ({
+        ...item,
+        badge: item.label === 'Orders' && pendingCount > 0 ? pendingCount : null
+    }));
 
     return (
         <aside className="w-64 bg-stone-900 text-white flex flex-col h-screen fixed left-0 top-0 z-50">
@@ -39,7 +48,7 @@ export default function AdminSidebar() {
             </div>
 
             <nav className="flex-1 py-6 px-4 space-y-2 overflow-y-auto">
-                {adminNavItems.map((item) => (
+                {navItems.map((item) => (
                     <Link
                         key={item.href}
                         href={item.href}
@@ -57,7 +66,18 @@ export default function AdminSidebar() {
                             )} />
                             <span className="font-bold text-sm tracking-wide">{item.label}</span>
                         </div>
-                        {pathname.startsWith(item.href) && <ChevronRight className="w-4 h-4 opacity-70" />}
+                        {item.badge ? (
+                            <span className={cn(
+                                "px-2 py-0.5 rounded-full text-[10px] font-black",
+                                pathname.startsWith(item.href)
+                                    ? "bg-white text-amber-600"
+                                    : "bg-amber-500 text-stone-900"
+                            )}>
+                                {item.badge}
+                            </span>
+                        ) : (
+                            pathname.startsWith(item.href) && <ChevronRight className="w-4 h-4 opacity-70" />
+                        )}
                     </Link>
                 ))}
             </nav>

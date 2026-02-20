@@ -68,7 +68,6 @@ export interface Product {
     storageInstruction?: string;
     dietaryPreference?: string;
     canReturn?: boolean;
-    availableLocations?: string[];
     tags?: string[];
 
     keyBenefits?: { title: string; icon: string }[];
@@ -80,6 +79,13 @@ export interface Product {
 
     collections?: any[]; // Populated collections
     createdAt: string;
+
+    // SEO Meta
+    metaTitle?: string;
+    metaDescription?: string;
+    keywords: string[];
+    isDeliverableEverywhere?: boolean;
+    availableLocations?: string[];
 }
 
 export interface PaginatedResponse<T> {

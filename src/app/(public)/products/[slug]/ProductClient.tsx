@@ -191,6 +191,54 @@ export default function ProductClient({ initialData }: { initialData?: Product |
                             </div>
                         )}
 
+                        {/* Delivery Availability Check */}
+                        <div className="mb-8 p-6 bg-stone-50 rounded-2xl border border-stone-200">
+                            <h3 className="text-sm font-bold text-stone-900 mb-4 flex items-center gap-2">
+                                <Truck className="w-4 h-4 text-amber-600" />
+                                Check Delivery Availability
+                            </h3>
+                            <div className="flex gap-2">
+                                <div className="relative flex-1">
+                                    <input
+                                        type="text"
+                                        maxLength={6}
+                                        placeholder="Enter 6-digit Pincode"
+                                        className="w-full h-11 px-4 py-2 bg-white border border-stone-200 rounded-lg text-sm font-bold focus:border-amber-500 outline-none"
+                                        id="delivery-pincode"
+                                    />
+                                </div>
+                                <button
+                                    onClick={async () => {
+                                        const pincode = (document.getElementById('delivery-pincode') as HTMLInputElement).value;
+                                        if (pincode.length !== 6) {
+                                            alert('Please enter a valid 6-digit pincode');
+                                            return;
+                                        }
+                                        try {
+                                            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products/${product._id}/check-delivery?pincode=${pincode}`);
+                                            const data = await res.json();
+                                            const statusEl = document.getElementById('delivery-status');
+                                            if (statusEl) {
+                                                statusEl.innerText = data.message;
+                                                statusEl.className = cn(
+                                                    "text-xs font-bold mt-2",
+                                                    data.isDeliverable ? "text-emerald-600" : "text-red-500"
+                                                );
+                                            }
+                                        } catch (e) {
+                                            alert('Failed to check delivery');
+                                        }
+                                    }}
+                                    className="px-6 h-11 bg-stone-900 border border-stone-900 text-white rounded-lg text-sm font-bold hover:bg-stone-800 transition-colors"
+                                >
+                                    Check
+                                </button>
+                            </div>
+                            <div id="delivery-status" className="text-xs font-medium mt-2 text-stone-500">
+                                Enter pincode to check delivery date and availability.
+                            </div>
+                        </div>
+
                         {/* Quantity and Add to Cart */}
                         <div className="flex flex-col sm:flex-row gap-4 mb-10 items-end">
                             <div className="flex flex-col gap-2 w-full sm:w-auto">
