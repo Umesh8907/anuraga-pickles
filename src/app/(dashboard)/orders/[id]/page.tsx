@@ -1,215 +1,290 @@
 'use client'
 
 import React from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { useOrder } from '@/hooks/useOrders'
-import { Package, Clock, CheckCircle2, Truck, XCircle, ChevronLeft, MapPin, CreditCard, Calendar, Info } from 'lucide-react'
+import {
+    Truck,
+    Star,
+    MessageCircle,
+    FileDown,
+    ArrowLeft,
+    CheckCircle,
+    Home,
+    User,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 
-const statusConfig = {
-    PENDING: { icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100', label: 'Processing' },
-    CONFIRMED: { icon: CheckCircle2, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100', label: 'Confirmed' },
-    SHIPPED: { icon: Truck, color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-100', label: 'Shipped' },
-    DELIVERED: { icon: CheckCircle2, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100', label: 'Delivered' },
-    CANCELLED: { icon: XCircle, color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-100', label: 'Cancelled' },
+/* ---------------- HELPERS ---------------- */
+
+function formatDate(iso: string) {
+    return new Date(iso).toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+    });
 }
 
 export default function OrderDetailsPage() {
     const params = useParams()
+    const router = useRouter()
     const id = params.id as string
     const { data: order, isLoading } = useOrder(id)
 
-    if (isLoading) return <div className="min-h-screen pt-32 text-center text-stone-600 font-medium italic">Retreiving order details...</div>;
+    if (isLoading) return <div className="min-h-screen pt-32 text-center text-stone-600 font-medium italic">Retrieving order details...</div>;
 
     if (!order) {
         return (
-            <div className="min-h-screen pt-32 text-center text-stone-600">
+            <div className="min-h-screen pt-32 text-center font-poppins text-stone-600">
                 <p>Order not found.</p>
-                <Link href="/orders" className="text-amber-700 font-bold hover:underline mt-4 inline-block">Back to Orders</Link>
+                <button
+                    onClick={() => router.push("/orders")}
+                    className="text-amber-700 font-semibold font-poppins hover:underline mt-4 inline-block"
+                >
+                    Back to Orders
+                </button>
             </div>
         )
     }
 
-    const status = statusConfig[order.orderStatus as keyof typeof statusConfig] || statusConfig.PENDING;
-    const StatusIcon = status.icon;
+    const deliveryCharge = 40;
+    const subtotal = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
     return (
-        <div className="min-h-screen bg-stone-50 pt-24 pb-20">
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                {/* Back Link */}
-                <Link href="/orders" className="inline-flex items-center gap-2 text-stone-500 hover:text-amber-700 font-bold mb-8 transition-colors">
-                    <ChevronLeft className="w-5 h-5" />
-                    Back to History
-                </Link>
+        <div className="min-h-screen bg-[#FAFAFA] pt-[25px] pb-20">
+            <div className="max-w-6xl mx-auto px-4">
+                {/* BACK BUTTON */}
+                <button
+                    onClick={() => router.push("/orders")}
+                    className="flex items-center gap-2 text-gray-700 mb-6 hover:text-black transition font-semibold font-poppins"
+                >
+                    <ArrowLeft className="w-5 h-5" />
+                    Back to Orders
+                </button>
 
-                {/* Header Card */}
-                <div className="bg-white rounded-[3rem] p-8 md:p-12 shadow-sm border border-stone-100 mb-8 overflow-hidden relative">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-amber-50 rounded-full blur-3xl transform translate-x-32 -translate-y-32"></div>
+                {/* MAIN GRID */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    {/* LEFT COLUMN */}
+                    <div className="space-y-6">
+                        {/* TOP CARD: ORDER ID + PAYMENT STATUS */}
+                        <div className="bg-white bg-[#FFFFFF] border border-[#E8E8E8] rounded-2xl overflow-hidden shadow-sm">
+                            <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center">
+                                <div>
+                                    <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-widest mb-1">Order ID</p>
+                                    <h1 className="text-lg font-semibold text-gray-900 font-poppins">
+                                        #{order._id?.toUpperCase()}
+                                    </h1>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-widest mb-1 font-poppins">Order Date</p>
+                                    <p className="text-sm font-semibold text-gray-800 font-poppins">{formatDate(order.createdAt)}</p>
+                                </div>
+                            </div>
 
-                    <div className="relative z-10">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
-                            <div>
-                                <span className="text-[10px] font-bold text-stone-400 uppercase tracking-[0.3em] block mb-2">Order Summary</span>
-                                <h1 className="text-3xl font-extrabold text-stone-900 tracking-tight italic">#{order._id?.toUpperCase()}</h1>
-                                <div className="flex items-center gap-4 mt-3">
-                                    <div className="flex items-center gap-2 text-stone-500 font-medium italic text-sm">
-                                        <Calendar className="w-4 h-4" />
-                                        {new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })}
+                            {/* PAYMENT SUCCESS ALERT */}
+                            {order.paymentStatus === 'PAID' && (
+                                <div className="bg-[#EAF8F0] px-6 py-5 flex gap-3">
+                                    <CheckCircle className="text-green-600 w-5 h-5 mt-[2px]" />
+                                    <div>
+                                        <p className="font-semibold font-poppins text-[15px] text-gray-900">
+                                            Payment Successful
+                                        </p>
+                                        <p className="text-sm text-gray-700 mt-1 font-medium font-poppins">
+                                            All set. No cash needed when your order arrives.
+                                        </p>
                                     </div>
-                                    <div className={cn("px-4 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest border", status.bg, status.color, status.border)}>
-                                        {status.label}
-                                    </div>
                                 </div>
-                            </div>
-                            <div className="text-right md:text-right">
-                                <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Total Amount</p>
-                                <p className="text-4xl font-black text-stone-900 tracking-tighter">₹{order.totalAmount.toLocaleString()}</p>
-                            </div>
+                            )}
                         </div>
 
-                        {/* Order Progress (Simple) */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-10 border-t border-stone-50">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-stone-50 rounded-2xl flex items-center justify-center text-stone-400">
-                                    <MapPin className="w-6 h-6" />
-                                </div>
-                                <div>
-                                    <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Shipping To</p>
-                                    <p className="font-bold text-stone-800 italic text-sm">{order.shippingAddress.name}</p>
-                                    <p className="text-xs text-stone-500 leading-snug">{order.shippingAddress.city}, {order.shippingAddress.state}</p>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-stone-50 rounded-2xl flex items-center justify-center text-stone-400">
-                                    <CreditCard className="w-6 h-6" />
-                                </div>
-                                <div>
-                                    <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Payment</p>
-                                    <p className="font-bold text-stone-800 italic text-sm">{order.paymentMethod}</p>
-                                    <p className={cn("text-xs font-bold leading-snug", order.paymentStatus === 'PAID' ? "text-green-600" : "text-amber-600")}>
-                                        {order.paymentStatus}
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-4">
-                                <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center", status.bg, status.color)}>
-                                    <StatusIcon className="w-6 h-6" />
-                                </div>
-                                <div>
-                                    <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Status Update</p>
-                                    <p className="font-bold text-stone-800 italic text-sm">{status.label}</p>
-                                    <p className="text-xs text-stone-500 leading-snug">Last updated today</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                        {/* ITEMS LIST */}
+                        <div className="space-y-4">
+                            {order.items.map((item, index) => (
+                                <div
+                                    key={index}
+                                    className=" bg-white border border-[#E8E8E8] rounded-2xl px-6 py-6 shadow-sm"
+                                >
+                                    <div className="flex bg-[#FFFFFF] flex-col sm:flex-row sm:items-start sm:justify-between gap-6">
+                                        {/* PRODUCT INFO */}
+                                        <div className="flex gap-5">
+                                            <div className="w-[95px] h-[95px] bg-[#EEF7F0] rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
+                                                <img
+                                                    src={item.image || 'https://placehold.co/100x100?text=Pickle'}
+                                                    alt={item.name}
+                                                    className="w-[75px] h-[75px] object-contain"
+                                                />
+                                            </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Items List */}
-                    <div className="lg:col-span-2 space-y-6">
-                        <div className="bg-white rounded-[2.5rem] shadow-sm border border-stone-100 overflow-hidden">
-                            <div className="px-8 py-6 border-b border-stone-50 flex items-center justify-between">
-                                <h2 className="font-bold text-stone-900 italic">Order Items ({order.items.length})</h2>
-                                <Package className="w-4 h-4 text-stone-300" />
-                            </div>
-                            <ul className="divide-y divide-stone-50">
-                                {order.items.map((item) => (
-                                    <li key={item._id} className="p-8 flex items-center gap-6 group">
-                                        <div className="w-20 h-20 bg-stone-50 rounded-[1.5rem] overflow-hidden border border-stone-100 flex-shrink-0">
-                                            <img
-                                                src={item.image || 'https://placehold.co/150x150?text=Pickle'}
-                                                alt={item.name}
-                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                            />
-                                        </div>
-                                        <div className="flex-1">
-                                            <h3 className="font-bold text-stone-900 italic text-lg">{item.name}</h3>
-                                            <p className="text-stone-400 text-sm italic">Qty: {item.quantity} • ₹{item.price.toLocaleString()}</p>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="font-black text-stone-900">₹{(item.price * item.quantity).toLocaleString()}</p>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
+                                            <div className="space-y-2">
+                                                <h2 className="font-semibold text-[16px] leading-snug max-w-[260px] text-gray-900 font-poppins">
+                                                    {item.name}
+                                                </h2>
 
-                        {/* Journey Tracker */}
-                        <div className="bg-white rounded-[2.5rem] shadow-sm border border-stone-100 p-8">
-                            <h2 className="font-bold text-stone-900 italic mb-10 flex items-center gap-3">
-                                <Clock className="w-4 h-4 text-amber-600" />
-                                Order History
-                            </h2>
-                            <div className="space-y-8">
-                                {order.history && order.history.length > 0 ? (
-                                    order.history.map((h, idx) => (
-                                        <div key={idx} className="flex gap-6 relative">
-                                            {idx !== order.history.length - 1 && (
-                                                <div className="absolute left-2.5 top-5 w-[1px] h-10 bg-stone-100"></div>
-                                            )}
-                                            <div className={cn(
-                                                "w-5 h-5 rounded-full mt-1.5 flex-shrink-0 z-10",
-                                                idx === 0 ? "bg-amber-600 shadow-lg shadow-amber-200" : "bg-stone-200"
-                                            )}></div>
-                                            <div>
-                                                <p className={cn("font-bold text-sm italic", idx === 0 ? "text-stone-900" : "text-stone-400")}>{h.status}</p>
-                                                {h.note && <p className="text-xs text-stone-500 mt-1">{h.note}</p>}
-                                                <p className="text-[10px] text-stone-400 mt-1 uppercase tracking-wider">{new Date(h.timestamp).toLocaleString('en-IN')}</p>
+                                                <p className="font-semibold text-[17px] text-gray-900 font-poppins">
+                                                    ₹{item.price.toLocaleString()}
+                                                </p>
+
+                                                <div className="pt-2 space-y-2 text-[13px]">
+                                                    <div className="flex items-center gap-2">
+                                                        <CheckCircle className="w-4 h-4 text-green-600" />
+                                                        <span className="font-medium text-gray-800 font-poppins">Order Confirmed, {formatDate(order.createdAt)}</span>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-2">
+                                                        {order.orderStatus === 'DELIVERED' ? (
+                                                            <>
+                                                                <CheckCircle className="w-4 h-4 text-green-600" />
+                                                                <span className="font-medium text-gray-800 font-poppins">Delivered</span>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <Truck className="w-4 h-4 text-blue-600" />
+                                                                <span className="font-medium text-gray-800 font-poppins">{order.orderStatus === 'SHIPPED' ? 'In Transit' : 'Processing'}</span>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                    ))
-                                ) : (
-                                    <p className="text-stone-400 italic text-sm">Waiting for the next milestone...</p>
-                                )}
+
+                                        {/* TRACK BUTTON */}
+                                        {order.orderStatus === 'SHIPPED' && (
+                                            <button className="bg-stone-900 hover:bg-stone-800 text-white font-semibold px-6 py-2.5 rounded-xl h-fit text-sm shadow-md transition-all font-poppins">
+                                                Track Order
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {/* ACTIONS */}
+                                    <div className="flex justify-between items-center mt-8 text-sm border-t border-gray-50 pt-5">
+                                        <button className="text-gray-900 font-medium hover:text-[#C1572A] transition font-poppins">
+                                            Return
+                                        </button>
+
+                                        <button className="flex items-center gap-2 text-gray-900 font-medium hover:text-[#C1572A] transition font-poppins">
+                                            <MessageCircle className="w-4 h-4" />
+                                            Chat with Us
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* RATE EXPERIENCE */}
+                        <div className="bg-[#FFFFFF] border border-[#E8E8E8] rounded-2xl shadow-sm overflow-hidden">
+                            <div className="px-6 py-4 border-b bg-[#FBFBFB]">
+                                <p className="font-semibold text-[15px] text-gray-900 font-poppins">
+                                    Rate your experience
+                                </p>
+                            </div>
+
+                            <div className="px-6 py-5">
+                                <p className="text-sm text-gray-700 mb-3 font-medium font-poppins">
+                                    Rate the product quality and delivery
+                                </p>
+
+                                <div className="bg-[#F8F8F8] rounded-xl py-4 flex justify-center gap-3">
+                                    {[1, 2, 3, 4, 5].map((i) => (
+                                        <Star
+                                            key={i}
+                                            className="w-6 h-6 text-gray-400 cursor-pointer hover:text-yellow-400 transition"
+                                        />
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Address & Actions */}
-                    <div className="lg:col-span-1 space-y-6">
-                        <div className="bg-stone-900 rounded-[2.5rem] p-10 text-white shadow-xl shadow-stone-200 relative overflow-hidden">
-                            <div className="absolute bottom-0 right-0 w-32 h-32 bg-amber-600/20 blur-2xl rounded-full"></div>
-                            <h3 className="font-bold text-lg mb-8 italic flex items-center gap-3">
-                                <MapPin className="w-5 h-5 text-amber-500" />
-                                Shipping Address
-                            </h3>
-                            <div className="space-y-1 text-stone-300 text-sm italic leading-relaxed">
-                                <p className="text-white font-black not-italic text-lg mb-2">{order.shippingAddress.name}</p>
-                                <p>{order.shippingAddress.addressLine1}</p>
-                                <p>{order.shippingAddress.city}, {order.shippingAddress.state}</p>
-                                <p>{order.shippingAddress.pincode}</p>
-                                <p className="mt-6 pt-6 border-t border-stone-800 text-stone-500">
-                                    <Phone className="w-3.5 h-3.5 inline mr-2" />
-                                    {order.shippingAddress.phone}
-                                </p>
+                    {/* RIGHT COLUMN */}
+                    <div className="space-y-6">
+                        {/* DELIVERY DETAILS */}
+                        <div className="bg-[#FFFFFF]  border border-[#E8E8E8] rounded-2xl shadow-sm">
+                            <div className="px-6 py-4 border-b">
+                                <h3 className="font-semibold text-[15px] text-gray-900 font-poppins">
+                                    Delivery Details
+                                </h3>
+                            </div>
+
+                            <div className="px-6 py-5 space-y-4 bg-[#FFFFFF]">
+                                {/* Address */}
+                                <div className="bg-[#F7F7F7] rounded-xl px-4 py-3 flex gap-4 items-start">
+                                    <div className="bg-white p-2 rounded-lg shadow-sm">
+                                        <Home className="w-4 h-4 text-gray-700" />
+                                    </div>
+                                    <div className="text-sm font-poppins">
+                                        <p className="font-semibold text-gray-900 font-poppins">Shipping Address</p>
+                                        <p className="text-gray-700 text-[13px] leading-snug mt-1 font-medium  font-poppins">
+                                            {order.shippingAddress.addressLine1}, {order.shippingAddress.city}, {order.shippingAddress.state}, {order.shippingAddress.pincode}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* User Info */}
+                                <div className="bg-[#F7F7F7] rounded-xl px-4 py-3 flex gap-4 items-start">
+                                    <div className="bg-white p-2 rounded-lg shadow-sm">
+                                        <User className="w-4 h-4 text-gray-700" />
+                                    </div>
+                                    <div className="text-sm flex justify-between w-full">
+                                        <div>
+                                            <p className="font-semibold text-gray-900 font-poppins">{order.shippingAddress.name}</p>
+                                            <p className="text-gray-700 text-[12px] mt-0.5 font-medium font-poppins">{order.shippingAddress.phone}</p>
+                                        </div>
+                                        {/* <span className="text-gray-500 text-[11px] font-medium uppercase tracking-wider font-poppins">Contact</span> */}
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="bg-amber-50 rounded-[2rem] p-8 border border-amber-100 italic">
-                            <div className="flex items-start gap-4 mb-4">
-                                <div className="p-2 bg-white rounded-xl shadow-sm">
-                                    <Info className="w-4 h-4 text-amber-600" />
-                                </div>
-                                <h4 className="font-bold text-amber-900 text-sm">Need Help?</h4>
+                        {/* ORDER SUMMARY */}
+                        <div className="bg-[#FFFFFF] border border-[#E8E8E8] rounded-2xl shadow-sm">
+                            <div className="px-6 py-4 border-b">
+                                <h3 className="font-semibold text-[15px] text-gray-900 font-poppins">
+                                    Order Summary
+                                </h3>
                             </div>
-                            <p className="text-amber-800/70 text-xs leading-relaxed mb-6">
-                                If there is any issue with your order, feel free to contact our spice support team.
-                            </p>
-                            <button className="w-full bg-white text-stone-900 font-bold py-3 rounded-xl shadow-sm border border-stone-100 hover:bg-stone-50 transition-all text-sm">
-                                Contact Support
-                            </button>
+
+                            <div className="px-6 py-5 space-y-4 text-sm">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-700 font-medium font-poppins">Subtotal</span>
+                                    <span className="font-semibold text-gray-700 font-poppins">₹{subtotal.toLocaleString()}</span>
+                                </div>
+
+                                <div className="flex justify-between items-center text-green-700">
+                                    <span className="font-medium font-poppins">Discount</span>
+                                    <span className="font-semibold font-poppins">-₹0.00</span>
+                                </div>
+
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-700 font-medium font-poppins">Delivery Charge</span>
+                                    <span className="font-semibold text-gray-700 font-poppins">₹{deliveryCharge.toLocaleString()}</span>
+                                </div>
+
+                                <div className="border-t border-gray-50 pt-4 flex justify-between items-center font-semibold text-[15px] text-gray-700 tracking-tighter font-poppins">
+                                    <span>Total Amount</span>
+                                    <span>₹{order.totalAmount.toLocaleString()}</span>
+                                </div>
+
+                                {/* Payment Method Badge */}
+                                <div className="border border-gray-100 rounded-xl px-4 py-3 bg-[#FCFCFC] flex items-center justify-between mt-6">
+                                    <span className="text-gray-800 font-semibold text-[13px] font-poppins">
+                                        Payment Method
+                                    </span>
+                                    <span className="px-3 py-1 bg-gray-900 text-white rounded-md text-[10px] font-semibold uppercase tracking-widest font-poppins">
+                                        {order.paymentMethod}
+                                    </span>
+                                </div>
+
+                                {/* Download Invoice Button */}
+                                <button className="w-full bg-[#F9EFE9] hover:bg-[#f3e2d8] transition py-3.5 rounded-xl flex items-center justify-center gap-2 font-semibold text-sm border border-[#F1DED2] text-[#C1572A] mt-4 shadow-sm font-poppins">
+                                    <FileDown className="w-4 h-4" />
+                                    Download Invoice
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    )
-}
-
-function Phone({ className }: { className?: string }) {
-    return (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
     )
 }

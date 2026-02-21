@@ -24,7 +24,7 @@ export default function CheckoutLayout({
     }
 
     return (
-        <div className="min-h-screen bg-[#fbf6ee] pt-[120px] sm:pt-[120px] md:pt-[130px] lg:pt-[140px] pb-20 font-poppins">
+        <div className="min-h-screen bg-[#fbf6ee] pt-[100px] sm:pt-[80px] md:pt-[90px] lg:pt-[90px] pb-20 font-poppins">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-10">
                 <CheckoutSteps />
                 {children}

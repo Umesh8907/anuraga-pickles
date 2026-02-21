@@ -18,11 +18,11 @@ const features = [
 
 const HeroSection = () => {
     return (
-        <section className="relative w-full min-h-[550px] md:min-h-[640px] lg:min-h-[710px] overflow-hidden bg-[#FFF9EC] pb-12 lg:pb-0">
+        <section className="relative w-full min-h-[550px] md:min-h-[640px] lg:h-screen overflow-hidden bg-[#FFF9EC] pb-12 lg:pb-0">
 
 
             {/* HERO BG */}
-            <div className="absolute -top-32 left-0 w-full h-[calc(100%+9rem)] z-0">
+            <div className="absolute -top-64 left-0 w-full h-[calc(100%+17rem)] z-0">
                 <Image
                     src={heroBg}
                     alt="Hero Background"
@@ -33,7 +33,7 @@ const HeroSection = () => {
             </div>
 
             {/* RIGHT HERO BG */}
-            <div className="absolute -top-32 right-0 h-[calc(100%+9rem)] w-[380px] z-10 hidden lg:block">
+            <div className="absolute -top-64 right-0 h-[calc(100%+17rem)] w-[380px] z-10 hidden lg:block">
                 <Image
                     src={rightHero}
                     alt="Right Hero"
@@ -43,11 +43,11 @@ const HeroSection = () => {
             </div>
 
             {/* CONTENT */}
-            <div className="relative z-20 max-w-[1440px] mx-auto px-6 lg:px-16 pt-[90px] sm:pt-[110px] md:pt-[130px] lg:pt-[40px] lg:-translate-y-28">
+            <div className="relative z-20 max-w-[1440px] mx-auto px-6 lg:px-16 pt-[90px] sm:pt-[110px] md:pt-[130px] lg:pt-[25px] lg:h-full">
 
 
                 {/* Reduced padding to move content up */}
-                <div className="flex flex-col lg:flex-row justify-between items-center gap-12">
+                <div className="flex flex-col lg:flex-row justify-between items-center gap-12 lg:h-full">
 
                     {/* LEFT TEXT */}
                     <div className="max-w-[700px]">
@@ -116,4 +116,4 @@ const HeroSection = () => {
     )
 }
 
-export default HeroSection
+export default HeroSection 

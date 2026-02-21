@@ -31,16 +31,17 @@ export default function CartPage() {
 
     if (cartItems.length === 0) {
         return (
-            <div className="min-h-screen bg-[#fbf6ee] pt-20 flex flex-col items-center justify-center p-4">
+            // <div className="min-h-screen bg-[#fbf6ee] flex flex-col items-center justify-center p-4">
+            <div className="min-h-[70vh] bg-[#fbf6ee] flex flex-col items-center justify-start pt-8 pb-10 px-4">
                 <div className="bg-white p-12 rounded-2xl shadow-sm text-center max-w-md w-full border border-stone-100">
                     <div className="w-24 h-24 bg-stone-50 rounded-full flex items-center justify-center mx-auto mb-6">
                         <ShoppingCart className="w-10 h-10 text-stone-300" />
                     </div>
-                    <h2 className="text-xl font-bold text-stone-900 mb-2">Hey, it feels so light!</h2>
-                    <p className="text-stone-500 mb-8 text-sm">There is nothing in your bag. Let's add some items.</p>
+                    <h2 className="text-xl font-bold text-stone-900 mb-2 font-poppins">Hey, it feels so light!</h2>
+                    <p className="text-stone-500 mb-8 text-sm font-poppins">There is nothing in your bag. Let's add some items.</p>
                     <Link
                         href="/collections/all-products"
-                        className="inline-block border border-rose-500 text-rose-500 font-bold py-3 px-10 rounded-xl hover:bg-rose-50 transition-all uppercase tracking-wider text-sm"
+                        className="inline-block border border-[#C1572A] text-[#C1572A] font-bold py-3 px-10 rounded-xl hover:bg-[#C1572A] hover:text-white transition-all uppercase tracking-wider text-sm font-poppins"
                     >
                         Add Items From Wishlist
                     </Link>

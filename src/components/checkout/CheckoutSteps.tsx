@@ -23,7 +23,7 @@ export default function CheckoutSteps() {
     const currentStepIndex = getCurrentStepIndex();
 
     return (
-        <div className="mb-10">
+        <div className="mb-12">
             <div className="flex items-center justify-center">
                 {steps.map((step, index) => {
                     const isCurrent = index === currentStepIndex;

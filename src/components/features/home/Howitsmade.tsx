@@ -1,6 +1,5 @@
 import Image, { StaticImageData } from "next/image";
 
-// ✅ Import your images from src/assets
 import sourcingImg from "@/assets/Sourcing.png";
 import preparationImg from "@/assets/Preparation.png";
 import qualityImg from "@/assets/QualityCheck.png";
@@ -144,10 +143,10 @@ function ImageBox({
   return (
     <div
       className={`relative h-[160px] w-full max-w-[360px] overflow-hidden rounded-xl shadow-md sm:h-[180px] ${align === "left"
-          ? "ml-auto"
-          : align === "right"
-            ? "mr-auto"
-            : ""
+        ? "ml-auto"
+        : align === "right"
+          ? "mr-auto"
+          : ""
         }`}
     >
       <Image src={img} alt={alt} fill className="object-cover" />
@@ -169,10 +168,10 @@ function TextBox({
   return (
     <div
       className={`max-w-[360px] min-h-[140px] flex flex-col justify-center ${align === "right"
-          ? "ml-auto text-right"
-          : align === "left"
-            ? "mr-auto text-left"
-            : "text-left"
+        ? "ml-auto text-right"
+        : align === "left"
+          ? "mr-auto text-left"
+          : "text-left"
         }`}
     >
       <h3 className="text-[20px] font-semibold text-black">
